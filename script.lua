@@ -13,7 +13,7 @@ vanilla_model.CAPE:setVisible(false)
 --hide vanilla elytra model
 --vanilla_model.ELYTRA:setVisible(false)
 
-nameplate.ALL:setText([=[[{"text":"Vixen","color":"gold"},{"text":" :fox:"}]]=])
+nameplate.ALL:setText([=[[{"text":"Mira","color":"red"}]]=])
 
 --entity init event, used for when the avatar entity is loaded for the first time
 function events.entity_init()
