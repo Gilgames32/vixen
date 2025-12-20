@@ -75,7 +75,10 @@ function events.tick()
             0
         )
         targetRot = targetRot + velRot
+    else
+        targetRot = targetRot + tailTarget:getAnimRot()
     end
+
 
     -- limit angles
     targetRot.x = clampAngle(targetRot.x, -45, 60)
