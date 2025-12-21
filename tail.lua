@@ -68,7 +68,8 @@ function events.tick()
     local targetRot = tailTarget:getRot()
 
     -- rotate tail based on velocity while its not animated
-    if tailTarget:getAnimRot():lengthSquared() == 0 then
+    local tailAnimated = tailTarget:getAnimRot():lengthSquared() ~= 0
+    if not tailAnimated then
         local velRot = vec(
             math.clamp(playerVelRaw.y, -1, 1) * 90 - math.clamp(playerVelRaw.z, -0.5, 0.5) * 90,
             playerVelRaw.x * 45,
@@ -84,8 +85,9 @@ function events.tick()
     targetRot.x = clampAngle(targetRot.x, -45, 60)
     targetRot.y = clampAngle(targetRot.y, -60, 60)
     -- lerp towards the target angle
-    newTailRot.x = cosLerpAngle(newTailRot.x, targetRot.x, 90, 0.1)
-    newTailRot.y = cosLerpAngle(newTailRot.y, targetRot.y, 180, 0.1)
+    local lerpStrenght = tailAnimated and 0.5 or 0.1
+    newTailRot.x = cosLerpAngle(newTailRot.x, targetRot.x, 90, lerpStrenght)
+    newTailRot.y = cosLerpAngle(newTailRot.y, targetRot.y, 180, lerpStrenght)
 
     -- calculate wag time
     oldWagTime = newWagTime 
