@@ -12,7 +12,3 @@ yip_bind:onPress(function()
     -- force_start_anim(animations.model.ears_wag)
     force_start_anim(animations.model.tailWag)
 end)
-
-function events.damage()
-    sounds:playSound("minecraft:entity.fox.hurt", player:getPos())
-end

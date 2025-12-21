@@ -1,3 +1,5 @@
+require("util")
+
 local items = {
     "minecraft:emerald",
     "minecraft:chicken",
@@ -15,15 +17,6 @@ local mouthIP = models.model.root.Head.MouthIPivot
 local mouthTP = models.model.root.Head.MouthTPivot
 local rightIP = models.model.root.RightArm.RightItemPivot
 local leftIP = models.model.root.LeftArm.LeftItemPivot
-
-local function contains(tbl, x)
-    for _, v in pairs(tbl) do
-        if v == x then 
-            return true
-        end
-    end
-    return false
-end
 
 function events.tick()
     local handedness = false -- TODO player:isLeftHanded()
