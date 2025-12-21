@@ -41,7 +41,7 @@ function events.tick()
     if animations.model.walk:isPlaying() then
         oldVel = newVel
         newVel = math.lerp(oldVel, player:getVelocity().xz:length(), 0.5)
-        animations.model.walk:setSpeed(math.min(1.5, math.abs(newVel / 0.3)))
+        animations.model.walk:setSpeed(math.min(1.5, math.abs(newVel / 0.32)))
     else
         oldVel = 0
         newVel = 0
