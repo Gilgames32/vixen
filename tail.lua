@@ -66,9 +66,11 @@ function events.tick()
 
     -- target tail rotation
     local targetRot = tailTarget:getRot()
+    local targetAnimRot = tailTarget:getAnimRot()
+    local tailAnimated = targetRot:lengthSquared() ~= 0
+    local tailWagged = targetAnimRot.y ~= 0 or targetAnimRot.z ~= 0
 
     -- rotate tail based on velocity while its not animated
-    local tailAnimated = tailTarget:getAnimRot():lengthSquared() ~= 0
     if not tailAnimated then
         local velRot = vec(
             math.clamp(playerVelRaw.y, -1, 1) * 90 - math.clamp(playerVelRaw.z, -0.5, 0.5) * 90,
@@ -77,7 +79,7 @@ function events.tick()
         )
         targetRot = targetRot + velRot
     else
-        targetRot = targetRot + tailTarget:getAnimRot()
+        targetRot = targetRot + targetAnimRot
     end
 
 
@@ -96,7 +98,9 @@ function events.tick()
         newWagTime = newWagTime - 2 * math.pi
         oldWagTime = oldWagTime - 2 * math.pi
     end
+
     -- calculate wag strenght
+    if tailWagged then wagWalkSpeed = 0.1 end -- wag less while its animated
     oldWagStrenght = newWagStrenght
     newWagStrenght = math.lerp(newWagStrenght, playerVel.z * waterStrength * wagWalkSpeed, 0.1)
 
