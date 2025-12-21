@@ -35,21 +35,35 @@ end
 
 
 -- running animation speed and strength setting
-local oldVel = 0
-local newVel = 0
+local oldHVel = 0
+local newHVel = 0
+local oldVVel = 0
+local newVVel = 0
 function events.tick()
     if animations.model.walk:isPlaying() then
-        oldVel = newVel
-        newVel = math.lerp(oldVel, player:getVelocity().xz:length(), 0.5)
-        animations.model.walk:setSpeed(math.min(1.5, math.abs(newVel / 0.32)))
+        local pVel = player:getVelocity()
+        oldHVel = newHVel
+        newHVel = math.lerp(oldHVel, pVel.xz:length(), 0.5)
+        animations.model.walk:setSpeed(math.min(1.5, math.abs(newHVel / 0.32)))
     else
-        oldVel = 0
-        newVel = 0
+        oldHVel = 0
+        newHVel = 0
+    end
+    
+    if animations.model.climb:isPlaying() then
+        local pVel = player:getVelocity()
+        oldVVel = newVVel
+        -- dont lerp when changing directions
+        newVVel = (oldVVel * newVVel < 0) and pVel.y or math.lerp(oldVVel, pVel.y, 0.5) 
+        animations.model.climb:setSpeed(math.min(1.5, (newVVel / 0.15)))
+    else
+        oldVVel = 0
+        newVVel = 0
     end
 end
 function events.render(delta)
-    if newVel > 0 or oldVel > 0 then
-        local weight = math.lerp(oldVel, newVel, delta)
+    if newHVel > 0 or oldHVel > 0 then
+        local weight = math.lerp(oldHVel, newHVel, delta)
         animations.model.walk:setBlend(math.min(1, math.abs(weight / 0.20)))
     end
 end
