@@ -4,30 +4,36 @@ local wheel = require("wheel")
 local auto = false
 local skinUpdateInterval = 80
 local skinUpdateTimer = 0
-local currentSkin = "skin_rebecca"
 
 local skinEntries = {
     Rebecca = {
         texture = "skin_rebecca",
         icon = "minecraft:redstone",
+        name = [=[[{"text":"Rebecca","color":"gold"}]]=],
     },
     Mira = {
         texture = "skin_mira",
         icon = "minecraft:target",
+        name = [=[[{"text":"Mira","color":"red"}]]=],
     },
     Eva = {
         texture = "skin_eva",
         icon = "minecraft:crimson_nylium",
+        name = [=[[{"text":"Eva","color":"dark_red"}]]=],
     },
     Rue = {
         texture = "skin_rue",
         icon = "minecraft:red_sand",
+        name = [=[[{"text":"Rue","color":"gold"}]]=],
     },
     Kaya = {
         texture = "skin_kaya",
         icon = "minecraft:snow_block",
+        name = [=[[{"text":"Kaya","color":"white"}]]=],
     },
 }
+local currentSkin = skinEntries.Rebecca
+nameplate.ALL:setText(currentSkin.name)
 
 local isSleeping = false
 local function setSkinSleeping(enabled)
@@ -35,10 +41,11 @@ local function setSkinSleeping(enabled)
     isSleeping = enabled
     models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin .. "_sleep") or currentSkin])
 end
-local function setSkin(newTexture)
-    if currentSkin and currentSkin == newTexture then return end
-    models.model.root:setPrimaryTexture("CUSTOM", textures[newTexture])
-    currentSkin = newTexture
+local function setSkin(skin)
+    if currentSkin == skin then return end
+    models.model.root:setPrimaryTexture("CUSTOM", textures[skin.texture])
+    currentSkin = skin
+    nameplate.ALL:setText(skin.name)
 end
 
 -- skin entries
@@ -48,7 +55,7 @@ for key, value in pairs(skinEntries) do
     :setItem(value.icon)
     :onLeftClick(function (_)
         auto = false
-        setSkin(value.texture)
+        setSkin(value)
     end)
 end
 wheel.skinPage:newAction()
@@ -64,12 +71,12 @@ local function autoSkin()
     -- eva in nether
     local dimension = world.getDimension()
     if dimension == "minecraft:the_nether" then
-        setSkin(skinEntries.Eva.texture)
+        setSkin(skinEntries.Eva)
         return
     end
     -- mira in end
     if dimension == "minecraft:the_end" then
-        setSkin(skinEntries.Mira.texture)
+        setSkin(skinEntries.Mira)
         return
     end
 
@@ -84,11 +91,11 @@ local function autoSkin()
 
     -- eva in dark forests
     if biome.id == "minecraft:dark_forest" then
-        setSkin(skinEntries.Eva.texture)
+        setSkin(skinEntries.Eva)
         return
     end
 
-    setSkin(skinEntries.Rue.texture)
+    setSkin(skinEntries.Rue)
 end
 
 function events.tick()
