@@ -4,6 +4,7 @@ local wheel = require("wheel")
 local auto = false
 local skinUpdateInterval = 80
 local skinUpdateTimer = 0
+local currentSkin = "skin_rebecca"
 
 local skinEntries = {
     Rebecca = {
@@ -28,8 +29,16 @@ local skinEntries = {
     },
 }
 
+local isSleeping = false
+local function setSkinSleeping(enabled)
+    if isSleeping == enabled then return end
+    isSleeping = enabled
+    models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin .. "_sleep") or currentSkin])
+end
 local function setSkin(newTexture)
+    if currentSkin and currentSkin == newTexture then return end
     models.model.root:setPrimaryTexture("CUSTOM", textures[newTexture])
+    currentSkin = newTexture
 end
 
 -- skin entries
@@ -83,6 +92,8 @@ local function autoSkin()
 end
 
 function events.tick()
+    setSkinSleeping(player:getPose() == "SLEEPING")
+
     if not auto then return end
     if skinUpdateTimer < skinUpdateInterval then
         skinUpdateTimer = skinUpdateTimer + 1
