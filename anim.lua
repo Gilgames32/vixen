@@ -20,6 +20,12 @@ function events.entity_init()
     :setBlendCurve("easeInOutSine")
     -- :onBlend(blendVanillaAnimHeadless)
 
+    animations.model.jumpup
+    :setBlendTime(2, 8)
+    animations.model.jumpdown
+    :setBlendTime(16, 2)
+    :setBlendCurve("easeInOutSine")
+
     animations.model.sprint:setSpeed(0.8)
 
     -- animations.model.sprintjumpup
