@@ -9,6 +9,6 @@ end
 
 yip_bind:onPress(function()
     sounds:playSound("minecraft:entity.fox.ambient", player:getPos())
-    -- force_start_anim(animations.model.ears_wag)
+    force_start_anim(animations.model.wag)
     force_start_anim(animations.model.tailWag)
 end)
