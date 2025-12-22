@@ -1,4 +1,4 @@
-require("util")
+require("scripts.util")
 
 -- page history for backing
 local history = {}

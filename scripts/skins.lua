@@ -1,4 +1,4 @@
-local wheel = require("wheel")
+local wheel = require("scripts.wheel")
 
 -- automatic skin updated based on the biome
 local auto = false

@@ -1,12 +1,6 @@
-require("tail")
-local wagBind = keybinds:newKeybind("Wag", "key.keyboard.h")
+require("scripts.tail")
 
-local function force_start_anim(anim) 
-    if anim:isPlaying() then
-        anim:stop()
-    end
-    anim:play()
-end
+local wagBind = keybinds:newKeybind("Wag", "key.keyboard.h")
 
 wagBind:onPress(function()
     sounds:playSound("minecraft:entity.fox.ambient", player:getPos())

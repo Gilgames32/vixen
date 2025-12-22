@@ -1,4 +1,4 @@
-require("util")
+require("scripts.util")
 
 local itemsExtra = {
     "minecraft:emerald",

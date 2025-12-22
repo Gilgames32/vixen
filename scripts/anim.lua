@@ -1,5 +1,5 @@
-local EZAnims = require("EZAnims")
-local GSAnimBlend = require("GSAnimBlend")
+local EZAnims = require("scripts.EZAnims")
+local GSAnimBlend = require("scripts.GSAnimBlend")
 
 local blendVanillaAnimHeadless = GSAnimBlend.callback.genBlendVanilla({
     --models.model.root.Head, -- TODO

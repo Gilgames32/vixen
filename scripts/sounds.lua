@@ -1,4 +1,4 @@
-local wheel = require("wheel")
+local wheel = require("scripts.wheel")
 
 -- soundboard sounds
 local soundboardEntries = {
