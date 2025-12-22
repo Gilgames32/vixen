@@ -1,8 +1,8 @@
 local EZAnims = require("EZAnims")
 local GSAnimBlend = require("GSAnimBlend")
 
-local blendVanillaAnimHeadless = GSAnimBlend.callback.genBlendVanilla({
-    --models.model.root.Head, -- TODO
+local blendVanillaAnim = GSAnimBlend.callback.genBlendVanilla({
+    models.model.root.Head, -- TODO
     models.model.root.Body,
     models.model.root.LeftArm,
     models.model.root.LeftLeg,
@@ -18,7 +18,7 @@ function events.entity_init()
     animations.model.fall
     :blendTime(10, 1)
     :setBlendCurve("easeInOutSine")
-    -- :onBlend(blendVanillaAnimHeadless)
+    :onBlend(blendVanillaAnim)
 
     animations.model.sprint:setSpeed(0.8)
 
