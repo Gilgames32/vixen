@@ -39,7 +39,7 @@ local isSleeping = false
 local function setSkinSleeping(enabled)
     if isSleeping == enabled then return end
     isSleeping = enabled
-    models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin .. "_sleep") or currentSkin])
+    models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin.texture .. "_sleep") or currentSkin.texture])
 end
 local function setSkin(skin)
     if currentSkin == skin then return end
