@@ -16,6 +16,7 @@ local toolsExtra = {
 
 local function isMouthTool(item)
     if item:isTool() then return true end
+    if item.id:find("_sword") then return true end
     return contains(toolsExtra, item.id)
 end
 

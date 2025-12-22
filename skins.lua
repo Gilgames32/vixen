@@ -85,7 +85,7 @@ local function autoSkin()
     
     -- kaya in cold 
     if temperature <= 0.25 then
-        setSkin(skinEntries.Kaya.texture)
+        setSkin(skinEntries.Kaya)
         return
     end
 

@@ -67,7 +67,7 @@ function events.tick()
     -- target tail rotation
     local targetRot = tailTarget:getRot()
     local targetAnimRot = tailTarget:getAnimRot()
-    local tailAnimated = targetRot:lengthSquared() ~= 0
+    local tailAnimated = targetAnimRot:lengthSquared() ~= 0
     local tailWagged = targetAnimRot.y ~= 0 or targetAnimRot.z ~= 0
 
     -- rotate tail based on velocity while its not animated
