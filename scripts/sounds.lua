@@ -81,6 +81,6 @@ for key, value in pairs(soundboardEntries) do
     :setTitle(key)
     :setItem(value.icon)
     :onLeftClick(function (_)
-        playerSound(value.sound)
+        pings.playerSound(value.sound)
     end)
 end

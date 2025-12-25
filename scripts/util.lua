@@ -10,7 +10,7 @@ function contains(tbl, x)
 end
 
   ---@param sound Minecraft.soundID
-function playerSound(sound)
+function pings.playerSound(sound)
     sounds:playSound(sound, player:getPos())
 end
 

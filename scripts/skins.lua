@@ -47,6 +47,9 @@ local function setSkin(skin)
     currentSkin = skin
     nameplate.ALL:setText(skin.name)
 end
+function pings.pingSetSkin(skin)
+    setSkin(skin)
+end
 
 -- skin entries
 for key, value in pairs(skinEntries) do
@@ -55,7 +58,7 @@ for key, value in pairs(skinEntries) do
     :setItem(value.icon)
     :onLeftClick(function (_)
         auto = false
-        setSkin(value)
+        pings.pingSetSkin(value)
     end)
 end
 wheel.skinPage:newAction()
