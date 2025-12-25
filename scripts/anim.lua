@@ -25,7 +25,6 @@ function events.entity_init()
     animations.model.jumpdown
     :setBlendTime(16, 4)
     :setBlendCurve("easeInOutSine")
-    :setOnBlend(blendVanillaAnimHead)
 
     animations.model.sprint:setSpeed(0.8)
 end
