@@ -6,7 +6,7 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Animation Blending Library" <GSAnimBlend>
----@version v2.4.0
+---@version v2.4.1
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- Adds prewrite-like animation blending to the rewrite.
 -- Also includes the ability to modify how the blending works per-animation with blending callbacks.
@@ -19,7 +19,7 @@
 -- function, method, and field in this library.
 
 local ID = "GSAnimBlend"
-local VER = "2.4.0"
+local VER = "2.4.1"
 local FIG = {"0.1.0-rc.14", "0.1.5"}
 
 -- Safe version comparison --
@@ -457,7 +457,7 @@ local s, this = pcall(function()
     end
 
 
-    data.state = {
+    local state = {
       time = 0,
       max = time or false,
 
@@ -483,6 +483,7 @@ local s, this = pcall(function()
         done = false
       }
     }
+    data.state = state
 
     blending[anim] = true
 
@@ -498,7 +499,7 @@ local s, this = pcall(function()
     anim:pause()
 
     mt_bypass:pop(anim)
-    return data.state
+    return state
   end
 
   ---A helper function that immediately stops a running blend on an animation.  
@@ -606,7 +607,7 @@ local s, this = pcall(function()
     -- The actual callback is created here.
     return function(state)
       if state.done then
-        local id = "GSAnimBlend:BlendVanillaCleanup_" .. math.random(0, 0xFFFF)
+        local id = "GSAnimBlend:BlendVanillaCleanup_" .. math.random(0, 0xFFFFFF)
         local events_render = events.RENDER
         local events_postworldrender = events.POST_WORLD_RENDER
 
@@ -622,13 +623,17 @@ local s, this = pcall(function()
       else
         local pct = state.starting and 1 - state.progress or state.progress
 
-        for n, v in pairs(part_list) do
-          ---@type Vector3
-          local rot = vanilla_model[n]:getOriginRot()
-          if n == "HEAD" then rot[2] = ((rot[2] + 180) % 360) - 180 end
-          rot:scale(pct)
-          for _, p in ipairs(v) do p:offsetRot(rot) end
-        end
+        local id = "GSAnimBlend:BlendVanillaActive_" .. math.random(0, 0xFFFFFF)
+        events.POST_RENDER:register(function()
+          for n, v in pairs(part_list) do
+            ---@type Vector3
+            local rot = vanilla_model[n]:getOriginRot()
+            if n == "HEAD" then rot[2] = ((rot[2] + 180) % 360) - 180 end
+            rot:scale(pct)
+            for _, p in ipairs(v) do p:offsetRot(rot) end
+          end
+          events.POST_RENDER:remove(id)
+        end, id)
 
         state.anim:setBlend(m_lerp(state.from, state.to, state.progress))
       end
