@@ -12,14 +12,6 @@ local blendVanillaAnimHeadless = GSAnimBlend.callback.genBlendVanilla({
 
 function events.entity_init()
 
-    animations.model.crouch
-    :setBlendTime(0)
-
-    animations.model.fall
-    :blendTime(10, 1)
-    :setBlendCurve("easeInOutSine")
-    -- :onBlend(blendVanillaAnimHeadless)
-
     animations.model.jumpup
     :setBlendTime(2, 8)
     animations.model.jumpdown
