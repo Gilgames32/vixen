@@ -7,11 +7,18 @@ local itemsExtra = {
     "minecraft:totem_of_undying",
     "minecraft:shears",
     "minecraft:flint_and_steel",
+    "minecraft:redstone",
+    "minecraft:milk_bucket",
+    "minecraft:book",
 }
 
 local toolsExtra = {
     "minecraft:trident",
     "minecraft:mace",
+    "minecraft:fishing_rod",
+    "minecraft:fishing_rod",
+    "minecraft:bone",
+    "minecraft:stick",
 }
 
 local function isMouthTool(item)
