@@ -7,27 +7,27 @@ local skinUpdateTimer = 0
 
 local skinEntries = {
     Rebecca = {
-        texture = "skin_rebecca",
+        texture = "assets.skin_rebecca",
         icon = "minecraft:redstone",
         name = [=[[{"text":"Rebecca","color":"gold"}]]=],
     },
     Mira = {
-        texture = "skin_mira",
+        texture = "assets.skin_mira",
         icon = "minecraft:target",
         name = [=[[{"text":"Mira","color":"red"}]]=],
     },
     Eva = {
-        texture = "skin_eva",
+        texture = "assets.skin_eva",
         icon = "minecraft:crimson_nylium",
         name = [=[[{"text":"Eva","color":"dark_red"}]]=],
     },
     Rue = {
-        texture = "skin_rue",
+        texture = "assets.skin_rue",
         icon = "minecraft:red_sand",
         name = [=[[{"text":"Rue","color":"gold"}]]=],
     },
     Kaya = {
-        texture = "skin_kaya",
+        texture = "assets.skin_kaya",
         icon = "minecraft:snow_block",
         name = [=[[{"text":"Kaya","color":"white"}]]=],
     },
