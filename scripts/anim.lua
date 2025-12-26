@@ -1,14 +1,7 @@
 local EZAnims = require("scripts.EZAnims")
 local GSAnimBlend = require("scripts.GSAnimBlend")
+local wheel = require("scripts.wheel")
 
-local blendVanillaAnim = GSAnimBlend.callback.genBlendVanilla({
-    models.model.root.Head,
-    models.model.root.Body,
-    models.model.root.LeftArm,
-    models.model.root.LeftLeg,
-    models.model.root.RightArm,
-    models.model.root.RightLeg,
-})
 
 local blendVanillaAnimHead = GSAnimBlend.callback.genBlendVanilla({
     models.model.root.Head,
@@ -25,18 +18,27 @@ function events.entity_init()
     animations.model.jumpdown
     :setBlendTime(16, 4)
     :setBlendCurve("easeInOutSine")
+    animations.model.walkjumpup
+    :setBlendTime(2, 8)
+    animations.model.walkjumpdown
+    :setBlendTime(16, 4)
+    :setBlendCurve("easeInOutSine")
 
     animations.model.sprint:setSpeed(0.8)
     animations.model.walkback:setSpeed(1.25)
 end
 
-
+local wAnim = nil
+local wAnimPos = vec(0, 0, 0)
+local wAnimStopDistanceSquared = 0.01
 -- running animation speed and strength setting
 local oldHVel = 0
 local newHVel = 0
 local oldVVel = 0
 local newVVel = 0
 function events.tick()
+    if wAnim and (wAnimPos - player:getPos()):lengthSquared() > wAnimStopDistanceSquared then pings.stopWheelAnim() end
+
     if animations.model.walk:isPlaying() then
         local pVel = player:getVelocity()
         oldHVel = newHVel
@@ -64,3 +66,35 @@ function events.render(delta)
         animations.model.walk:setBlend(math.min(1, math.abs(weight / 0.20)))
     end
 end
+
+
+function pings.stopWheelAnim()
+    if wAnim then
+        wAnim:stop()
+        wAnim = nil
+    end
+    EZAnims.model:setAllOff(false)
+    pings.setSkinSleeping(false)
+end
+function pings.playWheelAnim(animName)
+    EZAnims.model:setAllOff(true)
+    wAnimPos = player:getPos()
+    if wAnim then wAnim:stop() end
+    wAnim = animations.model[animName]
+    wAnim:play(true)
+end
+
+wheel.animPage:newAction()
+:setTitle("sleep")
+:setItem("minecraft:red_bed")
+:onLeftClick(function (_)
+    pings.setSkinSleeping(true)
+    pings.playWheelAnim("wSleep")
+end)
+
+wheel.animPage:newAction()
+:setTitle("sit")
+:setItem("minecraft:spruce_stairs")
+:onLeftClick(function (_)
+    pings.playWheelAnim("wSit")
+end)

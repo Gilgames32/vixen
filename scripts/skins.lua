@@ -36,10 +36,16 @@ local currentSkin = skinEntries.Rebecca
 nameplate.ALL:setText(currentSkin.name)
 
 local isSleeping = false
+local function setSkinSleepingTexture(enabled)
+    models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin.texture .. "_sleep") or currentSkin.texture])
+end
 local function setSkinSleeping(enabled)
     if isSleeping == enabled then return end
     isSleeping = enabled
-    models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin.texture .. "_sleep") or currentSkin.texture])
+    setSkinSleepingTexture(isSleeping)
+end
+function pings.setSkinSleeping(enabled)
+    setSkinSleepingTexture(enabled)
 end
 local function setSkin(skin)
     if currentSkin == skin then return end
@@ -47,7 +53,7 @@ local function setSkin(skin)
     currentSkin = skin
     nameplate.ALL:setText(skin.name)
 end
-function pings.pingSetSkin(skin)
+function pings.setSkin(skin)
     setSkin(skin)
 end
 
@@ -58,7 +64,7 @@ for key, value in pairs(skinEntries) do
     :setItem(value.icon)
     :onLeftClick(function (_)
         auto = false
-        pings.pingSetSkin(value)
+        pings.setSkin(value)
     end)
 end
 wheel.skinPage:newAction()

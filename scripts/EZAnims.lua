@@ -710,6 +710,7 @@ local function getBBModels()
     }, 
     controllerMT)
     objects[1] = o
+    anims.model = o
     addAnims(bbmodels,o)
 end
 
@@ -717,7 +718,6 @@ function events.entity_init()
     if #objects == 0 then getBBModels() end
 end
 
-local firstRun = true
 ---@param ... table
 function anims:addBBModel(...)
     local bbmodels = {...}

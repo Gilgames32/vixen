@@ -25,6 +25,7 @@ end
 local mainPage = action_wheel:newPage("main page")
 local soundboardPage = action_wheel:newPage("sounds")
 local skinPage = action_wheel:newPage("skins")
+local animPage = action_wheel:newPage("animations")
 action_wheel:setPage(mainPage)
 
 -- main page entries
@@ -37,9 +38,16 @@ end)
 
 mainPage:newAction()
 :setTitle("skins")
-:setItem("minecraft:armor_stand")
+:setItem("minecraft:rabbit_hide")
 :onLeftClick(function (_)
     openPage(skinPage)
+end)
+
+mainPage:newAction()
+:setTitle("animations")
+:setItem("minecraft:armor_stand")
+:onLeftClick(function (_)
+    openPage(animPage)
 end)
 
 
@@ -47,4 +55,5 @@ return {
     mainPage = mainPage,
     skinPage = skinPage,
     soundboardPage= soundboardPage,
+    animPage = animPage,
 }

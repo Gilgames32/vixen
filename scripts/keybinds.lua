@@ -8,7 +8,8 @@ function pings.wagOnPress()
     sounds:playSound("minecraft:entity.fox.ambient", player:getPos())
     force_start_anim(animations.model.wag)
     animations.model.tailWag:play()
+    animations.model.tailWag:loop("LOOP")
 end
 function pings.wagOnRelease()
-    animations.model.tailWag:stop()
+    animations.model.tailWag:loop("ONCE")
 end
