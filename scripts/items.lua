@@ -10,15 +10,16 @@ local itemsExtra = {
     "minecraft:redstone",
     "minecraft:milk_bucket",
     "minecraft:book",
+    -- ADD YOUR ITEMS HERE
 }
 
 local toolsExtra = {
     "minecraft:trident",
     "minecraft:mace",
     "minecraft:fishing_rod",
-    "minecraft:fishing_rod",
     "minecraft:bone",
     "minecraft:stick",
+    -- ADD YOUR TOOLS HERE
 }
 
 local function isMouthTool(item)
