@@ -43,7 +43,7 @@ function events.tick()
         local pVel = player:getVelocity()
         oldHVel = newHVel
         newHVel = math.lerp(oldHVel, pVel.xz:length(), 0.5)
-        animations.model.walk:setSpeed(math.min(1.5, math.abs(newHVel / 0.275)))
+        animations.model.walk:setSpeed(math.min(1.5, math.abs(newHVel / 0.26)))
     else
         oldHVel = 0
         newHVel = 0

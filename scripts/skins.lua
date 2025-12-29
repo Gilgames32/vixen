@@ -49,8 +49,9 @@ function pings.setSkinSleeping(enabled)
 end
 local function setSkin(skin)
     if currentSkin == skin then return end
-    models.model.root:setPrimaryTexture("CUSTOM", textures[skin.texture])
     currentSkin = skin
+    models.model.root:setPrimaryTexture("CUSTOM", textures[skin.texture])
+    setSkinSleepingTexture(isSleeping)
     nameplate.ALL:setText(skin.name)
 end
 function pings.setSkin(skin)
