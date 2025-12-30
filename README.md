@@ -6,6 +6,8 @@ A playable [Figura](https://github.com/FiguraMC/Figura) avatar for Minecraft.
 
 ![cover](./misc/cover.png)
 
+Watch the trailer [here](https://www.youtube.com/watch?v=imlNdjn5elc)!
+
 > [!IMPORTANT]  
 > These are merely client side visuals and do **not** include custom movement or world generation (as you might have seen it in older videos). There are plans about those too, read down below.
 
@@ -61,7 +63,7 @@ Shaders:
 ## Credits
 
 Thanks to Rohan for the original idea, model, some animations as well as for helping with the project. 
-The textures of Mira, Rue, Eva and Kaya were originally made by Toucinin. 
+The textures of Mira, Rue, Eva and Kaya were originally made by Rohan and were touched up by Toucinin. 
 Shoutout to GrandpaScout for GSAnimBlend, JimmyHelp for EZAnims, Auriafoxgirl for inspiration on the tail physics and to ChloeSpacedOut for her figura tutorials. 
 
 # Plans
