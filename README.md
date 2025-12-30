@@ -4,6 +4,8 @@
 
 A playable [Figura](https://github.com/FiguraMC/Figura) avatar for Minecraft.
 
+![cover](./misc/cover.png)
+
 > [!IMPORTANT]  
 > These are merely client side visuals and do **not** include custom movement or world generation (as you might have seen it in older videos). There are plans about those too, read down below.
 
@@ -46,10 +48,15 @@ Shaders:
 - Hold certain items in the mouth. Tools will also be held in the mouth while spriting. You can modify which items and tools are held in the mouth in `scrips/items.lua`.
 - Hold `H` to wag the tail. Also moves the ears a little :3c
 - 5 different skins. Can be changed manually from the action wheel.
+
+![skins](./misc/skins.png)
+
 - Adaptive skin depending on the biome and dimension. Can be enabled from the action wheel.
 - Replaces some player sounds with the vanilla fox sound effects.
 - Soundboard for the vanilla fox sound effects. Can be played from the action wheel.
   - Snores while sleeping.
+
+![sleepy](./misc/sleepy.png)
 
 ## Credits
 
