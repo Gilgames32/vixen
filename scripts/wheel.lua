@@ -26,6 +26,7 @@ local mainPage = action_wheel:newPage("main page")
 local soundboardPage = action_wheel:newPage("sounds")
 local skinPage = action_wheel:newPage("skins")
 local animPage = action_wheel:newPage("animations")
+local settingsPage = action_wheel:newPage("settings")
 action_wheel:setPage(mainPage)
 
 -- main page entries
@@ -50,10 +51,17 @@ mainPage:newAction()
     openPage(animPage)
 end)
 
+mainPage:newAction()
+:setTitle("settings")
+:setItem("minecraft:totem_of_undying")
+:onLeftClick(function (_)
+    openPage(settingsPage)
+end)
 
 return {
     mainPage = mainPage,
     skinPage = skinPage,
     soundboardPage= soundboardPage,
     animPage = animPage,
+    settingsPage = settingsPage,
 }

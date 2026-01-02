@@ -32,8 +32,14 @@ local skinEntries = {
         name = [=[[{"text":"Kaya","color":"white"}]]=],
     },
 }
+local overridePlayerName = true
 local currentSkin = skinEntries.Rebecca
-nameplate.ALL:setText(currentSkin.name)
+
+function pings.setNamePlate(override)
+    nameplate.ALL:setText(override and currentSkin.name or "${name}")
+    overridePlayerName = override
+end
+pings.setNamePlate(overridePlayerName)
 
 local isSleeping = false
 local function setSkinSleepingTexture(enabled)
@@ -52,7 +58,7 @@ local function setSkin(skin)
     currentSkin = skin
     models.model.root:setPrimaryTexture("CUSTOM", textures[skin.texture])
     setSkinSleepingTexture(isSleeping)
-    nameplate.ALL:setText(skin.name)
+    pings.setNamePlate(overridePlayerName)
 end
 function pings.setSkin(skin)
     setSkin(skin)
