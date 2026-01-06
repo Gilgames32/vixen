@@ -41,7 +41,7 @@ Shaders:
 ## Features
 
 > [!NOTE]
-> To use the action wheel, hold `B`, click to select and left click to go back.
+> To use the action wheel, hold `B`, click to select and right click to go back.
 
 - Tail physics (real)!
 - Custom animations! Too many to list. Watch the trailers!
