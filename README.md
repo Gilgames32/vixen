@@ -8,6 +8,9 @@ A playable [Figura](https://github.com/FiguraMC/Figura) avatar for Minecraft.
 
 Watch the trailer [here](https://www.youtube.com/watch?v=imlNdjn5elc)!
 
+> [!TIP]
+> NEW! Custom skin guide. [Learn more.](#custom-skin-guide-very-simple)
+
 > [!IMPORTANT]  
 > These are merely client side visuals and do **not** include custom movement or world generation (as you might have seen it in older videos). There are plans about those too, read down below.
 
@@ -50,6 +53,7 @@ Shaders:
 - Hold certain items in the mouth. Tools will also be held in the mouth while spriting. You can modify which items and tools are held in the mouth in `scrips/items.lua`.
 - Hold `H` to wag the tail. Also moves the ears a little :3c
 - 5 different skins. Can be changed manually from the action wheel.
+- Option to [add your own skin](#custom-skin-guide-very-simple).
 
 ![skins](./misc/skins.png)
 
@@ -59,6 +63,18 @@ Shaders:
   - Snores while sleeping.
 
 ![sleepy](./misc/sleepy.png)
+
+### Custom skin guide (very simple)
+
+- In the `assets/` folder edit `skin_custom.png` and `skin_custom_sleep.png` according to your liking.
+  - You can use Blockbench for painting in 3D or any other image editor.
+  - If you are using a newer version of Blockbench do **NOT** save the model, only the texture. Newer versions of Blockbench aren't compatible with Figura.
+  - You only need to paint the head of the sleeping version, the rest will be ignored. The templates should be of help.
+  
+- In the `scripts/` folder edit the `skins.lua` script.
+  - Remove the lines starting with `--[[` and `--]]` (around line 34 and 46) to enable the custom skin entry.
+  - Customize it to your liking. The comments should be of help.
+  - To make it the default skin set `currentSkin` to `skinEntries.Custom` (around line 52)
 
 ## Credits
 

@@ -31,8 +31,24 @@ local skinEntries = {
         icon = "minecraft:snow_block",
         name = [=[[{"text":"Kaya","color":"white"}]]=],
     },
+    --[[ remove this line and its pair to uncomment and enable the custom skin
+
+    -- replace "Custom" to the name that should show in the tooltip when selecting the skin
+    Custom = {
+        texture = "assets.skin_custom",
+        -- change this to the block/item you want as the icon
+        icon = "minecraft:structure_block",
+        -- change this to the display name you want (https://minecraft.tools/en/json_text.php)
+        -- dont forget the [=[...]=] to escape special characters
+        name = [=[ [{"text":"Cu","color":"dark_aqua"},{"text":"s","color":"green"},{"text":"t","color":"yellow"},{"text":"om","color":"red"}] ]=],
+    },
+    
+    ]]-- the pair line in question that you also have to remove
 }
+-- change this to false if you want to keep your vanilla username
 local overridePlayerName = true
+-- change this to your custom skin entry to make it the default
+-- for example skinEntries.Custom, or whatever you have changed it to
 local currentSkin = skinEntries.Rebecca
 
 function pings.setNamePlate(override)
