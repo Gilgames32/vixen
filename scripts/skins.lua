@@ -31,6 +31,11 @@ local skinEntries = {
         icon = "minecraft:snow_block",
         name = [=[[{"text":"Kaya","color":"white"}]]=],
     },
+    Thea = {
+        texture = "assets.skin_thea",
+        icon = "minecraft:coal_block",
+        name = [=[[{"text":"Thea","color":"dark_gray"}]]=],
+    },
     --[[ remove this line and its pair to uncomment and enable the custom skin
 
     -- replace "Custom" to the name that should show in the tooltip when selecting the skin

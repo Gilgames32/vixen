@@ -72,9 +72,9 @@ Shaders:
   - You only need to paint the head of the sleeping version, the rest will be ignored. The templates should be of help.
   
 - In the `scripts/` folder edit the `skins.lua` script.
-  - Remove the lines starting with `--[[` and `--]]` (around line 34 and 46) to enable the custom skin entry.
+  - Remove the lines starting with `--[[` and `--]]` to enable the custom skin entry.
   - Customize it to your liking. The comments should be of help.
-  - To make it the default skin set `currentSkin` to `skinEntries.Custom` (around line 52)
+  - To make it the default skin set `currentSkin` to `skinEntries.Custom`
 
 ## Credits
 
