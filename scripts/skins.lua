@@ -38,11 +38,11 @@ local skinEntries = {
     },
     --[[ remove this line and its pair to uncomment and enable the custom skin
 
-    -- replace "Custom" to the name that should show in the tooltip when selecting the skin
-    Custom = {
-        texture = "assets.skin_custom",
-        -- change this to the block/item you want as the icon
-        icon = "minecraft:structure_block",
+    Custom = { -- replace "Custom" to the name that should show in the tooltip when selecting the skin
+        texture = "assets.skin_custom", -- do NOT change this line
+
+        icon = "minecraft:structure_block", -- change this to the block/item you want as the icon
+        
         -- change this to the display name you want (https://minecraft.tools/en/json_text.php)
         -- dont forget the [=[...]=] to escape special characters
         name = [=[ [{"text":"Cu","color":"dark_aqua"},{"text":"s","color":"green"},{"text":"t","color":"yellow"},{"text":"om","color":"red"}] ]=],
