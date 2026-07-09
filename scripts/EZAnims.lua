@@ -1,4 +1,4 @@
--- V3.0.0 for 0.1.0 and above
+-- V3.0.1 for 0.1.0 and above
 -- Made by JimmyHelp
 
 local anims = {}
@@ -134,6 +134,7 @@ end
 
 local function getSeg(name)
     local words = {}
+    if name == "" then words[1] = "empty" end
     for word in name:gmatch("[^_]+") do
         words[#words+1] = word
     end
@@ -334,9 +335,7 @@ end
 if events.damage then -- 0.1.5 check
     function events.damage()
         for _,o in pairs(objects) do
-            local hurting = o.aList.hurt
-            hurting.active = true
-            setAnimation("hurt",getOverriders(hurting.type,o),getStates(hurting.type,o),o)
+            o.aList.hurt.active = true
         end
     end
 end
@@ -600,7 +599,11 @@ local function getInfo()
         or ((ob.water.active and not ob.waterwalk.active) and next(ob.water.list)==nil) or ((ob.fly.active and not ob.flywalk.active) and next(ob.fly.list)==nil) or ((ob.crouch.active and not ob.crouchwalk.active) and next(ob.crouch.list)==nil) or (ob.jumpup.active and next(ob.jumpup.list)==nil)
 
         ob.death.active = hp <= 0
-        ob.hurt.active = oldhp ~= hp and hp < oldhp
+        if not events.damage then
+            ob.hurt.active = false
+        else
+            ob.hurt.active = oldhp ~= hp and hp < oldhp
+        end
 
         ob.attackR.active = arm == rightActive and rightAttack
         ob.attackL.active = arm == leftActive and leftAttack
@@ -649,9 +652,11 @@ local function getInfo()
     end
     oldhp = hp
     oldhitBlock = hitBlock
-    targetBlock = player:getTargetedBlock(true, game and 5 or 4.5)
-    blockSuccess, blockResult = pcall(targetBlock.getTextures, targetBlock)
-    if blockSuccess then hitBlock = not (next(blockResult) == nil) else hitBlock = true end
+    blockSuccess, blockResult = pcall(function()
+	targetBlock = player:getTargetedBlock(true, game and 5 or 4.5)
+		return targetBlock:getTextures(targetBlock)
+	end)
+	if blockSuccess then hitBlock = not (next(blockResult) == nil) else hitBlock = true end
 end
 
 function events.tick()
@@ -710,7 +715,6 @@ local function getBBModels()
     }, 
     controllerMT)
     objects[1] = o
-    anims.model = o
     addAnims(bbmodels,o)
 end
 
@@ -718,6 +722,7 @@ function events.entity_init()
     if #objects == 0 then getBBModels() end
 end
 
+local firstRun = true
 ---@param ... table
 function anims:addBBModel(...)
     local bbmodels = {...}
