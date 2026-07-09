@@ -59,7 +59,19 @@ function events.tick()
         oldVVel = 0
         newVVel = 0
     end
+
+    local lCalfRot = vec(0, 0, 0)
+    local rCalfRot = vec(0, 0, 0)
+    if animations.model.swim:isPlaying() then
+        lCalfRot = vanilla_model.LEFT_LEG:getOriginRot()
+        rCalfRot = vanilla_model.RIGHT_LEG:getOriginRot()
+        lCalfRot.x = math.min(0, lCalfRot.x)
+        rCalfRot.x = math.min(0, rCalfRot.x)
+    end
+    models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
+    models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
 end
+
 function events.render(delta)
     if newHVel > 0 or oldHVel > 0 then
         local weight = math.lerp(oldHVel, newHVel, delta)
