@@ -25,7 +25,6 @@ function events.entity_init()
     :setBlendCurve("easeInOutSine")
 
     animations.model.sprint:setSpeed(0.8)
-    animations.model.walkback:setSpeed(1.25)
 end
 
 local wAnim = nil
@@ -39,11 +38,12 @@ local newVVel = 0
 function events.tick()
     if wAnim and (wAnimPos - player:getPos()):lengthSquared() > wAnimStopDistanceSquared then pings.stopWheelAnim() end
 
-    if animations.model.walk:isPlaying() then
+    if animations.model.walk:isPlaying() or animations.model.walkback:isPlaying() then
         local pVel = player:getVelocity()
         oldHVel = newHVel
         newHVel = math.lerp(oldHVel, pVel.xz:length(), 0.5)
-        animations.model.walk:setSpeed(math.min(1.5, math.abs(newHVel / 0.26)))
+        animations.model.walk:setSpeed(math.clamp(newHVel * 4, 0.5, 2))
+        animations.model.walkback:setSpeed(math.clamp(newHVel * 6, 0.5, 2))
     else
         oldHVel = 0
         newHVel = 0
