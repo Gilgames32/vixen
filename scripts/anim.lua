@@ -7,6 +7,11 @@ local blendVanillaAnimHead = GSAnimBlend.callback.genBlendVanilla({
     models.model.root.Head,
 })
 
+local blendVanillaAnimArms = GSAnimBlend.callback.genBlendVanilla({
+    models.model.root.LeftArm,
+    models.model.root.RightArm,
+})
+
 function events.entity_init()
     animations.model.crouchfall
     :setBlendTime(2)
@@ -21,6 +26,13 @@ function events.entity_init()
     :setBlendTime(2, 8)
     animations.model.walkjumpdown
     :setBlendTime(16, 4)
+    :setBlendCurve("easeInOutSine")
+
+    animations.model.bowL
+    :setBlendTime(1, 8)
+    :setBlendCurve("easeInOutSine")
+    animations.model.bowR
+    :setBlendTime(1, 8)
     :setBlendCurve("easeInOutSine")
 
     animations.model.sprint:setSpeed(0.8)
@@ -80,6 +92,11 @@ function events.render(delta)
     end
     models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
     models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
+
+    -- TODO: also add bowL
+    if animations.model.bowR:isPlaying() then
+        
+    end
 end
 
 
