@@ -12,7 +12,6 @@ function events.entity_init()
     :setBlendTime(2)
     :setOnBlend(blendVanillaAnimHead)
 
-
     animations.model.jumpup
     :setBlendTime(2, 8)
     animations.model.jumpdown
@@ -36,8 +35,10 @@ local newHVel = 0
 local oldVVel = 0
 local newVVel = 0
 function events.tick()
+    -- stop wheel anims when moving
     if wAnim and (wAnimPos - player:getPos()):lengthSquared() > wAnimStopDistanceSquared then pings.stopWheelAnim() end
 
+    -- set walking animation speed
     if animations.model.walk:isPlaying() or animations.model.walkback:isPlaying() then
         local pVel = player:getVelocity()
         oldHVel = newHVel
@@ -49,6 +50,7 @@ function events.tick()
         newHVel = 0
     end
     
+    -- set climbing animation speed
     if animations.model.climb:isPlaying() then
         local pVel = player:getVelocity()
         oldVVel = newVVel
@@ -59,7 +61,15 @@ function events.tick()
         oldVVel = 0
         newVVel = 0
     end
+end
 
+function events.render(delta)
+    if newHVel > 0 or oldHVel > 0 then
+        local weight = math.lerp(oldHVel, newHVel, delta)
+        animations.model.walk:setBlend(math.min(1, math.abs(weight * 5)))
+    end
+
+    -- set calves rotation for swimming
     local lCalfRot = vec(0, 0, 0)
     local rCalfRot = vec(0, 0, 0)
     if animations.model.swim:isPlaying() then
@@ -70,13 +80,6 @@ function events.tick()
     end
     models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
     models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
-end
-
-function events.render(delta)
-    if newHVel > 0 or oldHVel > 0 then
-        local weight = math.lerp(oldHVel, newHVel, delta)
-        animations.model.walk:setBlend(math.min(1, math.abs(weight / 0.20)))
-    end
 end
 
 
