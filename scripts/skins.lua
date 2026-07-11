@@ -1,10 +1,5 @@
 local wheel = require("scripts.wheel")
 
--- automatic skin updated based on the biome
-local auto = false
-local skinUpdateInterval = 80
-local skinUpdateTimer = 0
-
 local skinEntries = {
     Rebecca = {
         texture = "assets.skin_rebecca",
@@ -50,18 +45,30 @@ local skinEntries = {
     
     ]]-- the pair line in question that you also have to remove
 }
--- change this to false if you want to keep your vanilla username
-local overridePlayerName = true
--- change this to your custom skin entry to make it the default
--- for example skinEntries.Custom, or whatever you have changed it to
+-- generate keys
+for key, value in pairs(skinEntries) do
+    value["key"] = key 
+end
 local currentSkin = skinEntries.Rebecca
 
-function pings.setNamePlate(override)
-    nameplate.ALL:setText(override and currentSkin.name or "${name}")
-    overridePlayerName = override
+-- automatic skin updated based on the biome
+local autoSkinEnabled = false
+local skinUpdateInterval = 80
+local skinUpdateTimer = 0
+local function setAutoSkin(enabled)
+    autoSkinEnabled = enabled
+    config:save("autoSkinEnabled", enabled)
 end
-pings.setNamePlate(overridePlayerName)
 
+-- nameplate overriding
+local overridePlayerName = true
+function pings.setNamePlate(override)
+    overridePlayerName = override
+    nameplate.ALL:setText(override and currentSkin.name or "${name}")
+    config:save("overridePlayerName", override)
+end
+
+-- sleeping
 local isSleeping = false
 local function setSkinSleepingTexture(enabled)
     models.model.root.Head:setPrimaryTexture("CUSTOM", textures[enabled and (currentSkin.texture .. "_sleep") or currentSkin.texture])
@@ -80,6 +87,7 @@ local function setSkin(skin)
     models.model.root:setPrimaryTexture("CUSTOM", textures[skin.texture])
     setSkinSleepingTexture(isSleeping)
     pings.setNamePlate(overridePlayerName)
+    config:save("currentSkin", skin.key)
 end
 function pings.setSkin(skin)
     setSkin(skin)
@@ -91,7 +99,7 @@ for key, value in pairs(skinEntries) do
     :setTitle(key)
     :setItem(value.icon)
     :onLeftClick(function (_)
-        auto = false
+        setAutoSkin(false)
         pings.setSkin(value)
     end)
 end
@@ -99,12 +107,12 @@ wheel.skinPage:newAction()
 :setTitle("auto")
 :setItem("minecraft:command_block")
 :onLeftClick(function (_)
-    auto = true
+    setAutoSkin(true)
     skinUpdateTimer = skinUpdateInterval
 end)
 
 
-local function autoSkin()
+local function updateAutoSkin()
     -- eva in nether
     local dimension = world.getDimension()
     if dimension == "minecraft:the_nether" then
@@ -135,10 +143,21 @@ local function autoSkin()
     setSkin(skinEntries.Rue)
 end
 
+
+function events.entity_init()
+    -- load config
+    if host:isHost() then
+        overridePlayerName = safeConfigLoad("overridePlayerName", overridePlayerName)
+        pings.setNamePlate(overridePlayerName)
+        setAutoSkin(safeConfigLoad("autoSkinEnabled", autoSkinEnabled))
+        setSkin(skinEntries[safeConfigLoad("currentSkin", currentSkin.key)])
+    end
+end
+
 function events.tick()
     setSkinSleeping(player:getPose() == "SLEEPING")
 
-    if not auto then return end
+    if not autoSkinEnabled then return end
     if skinUpdateTimer < skinUpdateInterval then
         skinUpdateTimer = skinUpdateTimer + 1
         return
@@ -146,5 +165,5 @@ function events.tick()
         skinUpdateTimer = 0
     end
 
-    autoSkin()
+    updateAutoSkin()
 end
