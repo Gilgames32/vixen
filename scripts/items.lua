@@ -19,6 +19,7 @@ local toolsExtra = {
     "minecraft:fishing_rod",
     "minecraft:bone",
     "minecraft:stick",
+    "minecraft:bow",
     -- ADD YOUR TOOLS HERE
 }
 

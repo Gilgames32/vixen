@@ -27,20 +27,36 @@ function events.entity_init()
     animations.model.walkjumpdown
     :setBlendTime(16, 4)
     :setBlendCurve("easeInOutSine")
+    animations.model.fly
+    :setBlendTime(2, 8)
 
-    animations.model.bowL
-    :setBlendTime(1, 8)
-    :setBlendCurve("easeInOutSine")
-    animations.model.bowR
-    :setBlendTime(1, 8)
-    :setBlendCurve("easeInOutSine")
+    local quickDraw = {
+        animations.model.bowL,
+        animations.model.bowR,
+        animations.model.blockL,
+        animations.model.blockR,
+    }
+    for _, anim in pairs(quickDraw) do
+        anim
+        :setBlendTime(1, 8)
+        :setBlendCurve("easeInOutSine")
+    end
 
-    animations.model.blockL
-    :setBlendTime(1, 8)
-    :setBlendCurve("easeInOutSine")
-    animations.model.blockR
-    :setBlendTime(1, 8)
-    :setBlendCurve("easeInOutSine")
+    animations.model.spearL:setPriority(1)
+    animations.model.spearR:setPriority(1)
+    animations.model.bowL:setPriority(1)
+    animations.model.bowR:setPriority(1)
+    animations.model.crossL:setPriority(1)
+    animations.model.crossR:setPriority(1)
+    animations.model.loadL:setPriority(1)
+    animations.model.loadR:setPriority(1)
+    animations.model.blockL:setPriority(1)
+    animations.model.blockR:setPriority(1)
+
+    animations.model.sprint:setPriority(2)
+    animations.model.sprintjumpup:setPriority(2)
+    animations.model.sprintjumpdown:setPriority(2)
+    animations.model.climb:setPriority(2)
 
     animations.model.sprint:setSpeed(0.8)
 end
