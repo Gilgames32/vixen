@@ -35,6 +35,13 @@ function events.entity_init()
     :setBlendTime(1, 8)
     :setBlendCurve("easeInOutSine")
 
+    animations.model.blockL
+    :setBlendTime(1, 8)
+    :setBlendCurve("easeInOutSine")
+    animations.model.blockR
+    :setBlendTime(1, 8)
+    :setBlendCurve("easeInOutSine")
+
     animations.model.sprint:setSpeed(0.8)
 end
 
