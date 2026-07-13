@@ -715,6 +715,7 @@ local function getBBModels()
     }, 
     controllerMT)
     objects[1] = o
+    anims.model = o
     addAnims(bbmodels,o)
 end
 
