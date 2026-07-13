@@ -115,11 +115,6 @@ function events.render(delta)
     end
     models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
     models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
-
-    -- TODO: also add bowL
-    if animations.model.bowR:isPlaying() then
-        
-    end
 end
 
 

@@ -150,7 +150,7 @@ function events.entity_init()
         overridePlayerName = safeConfigLoad("overridePlayerName", overridePlayerName)
         pings.setNamePlate(overridePlayerName)
         setAutoSkin(safeConfigLoad("autoSkinEnabled", autoSkinEnabled))
-        setSkin(skinEntries[safeConfigLoad("currentSkin", currentSkin.key)])
+        pings.setSkin(skinEntries[safeConfigLoad("currentSkin", currentSkin.key)])
     end
 end
 
