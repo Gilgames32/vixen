@@ -1,137 +1,222 @@
-local EZAnims = require("scripts.EZAnims")
-local GSAnimBlend = require("scripts.GSAnimBlend")
 local wheel = require("scripts.wheel")
 
+local aurianims = require("scripts.aurianims")
 
-local blendVanillaAnimHead = GSAnimBlend.callback.genBlendVanilla({
-    models.model.root.Head,
-})
+local modelAnims = animations["model"]
+local animController = aurianims.new()
 
-local blendVanillaAnimArms = GSAnimBlend.callback.genBlendVanilla({
-    models.model.root.LeftArm,
-    models.model.root.RightArm,
-})
+animController:setDriver(function (data)
+    local velocity = player:getVelocity()
+    local sprinty = player:isSprinting()
+    local pose = player:getPose()
+    local inLiquid = #world.getBlockState(player:getPos()):getFluidTags() >= 1
+    
+    -- hands
+    local handedness = player:isLeftHanded()
+    local using = player:isUsingItem()
+    local activeness = player:getActiveHand()
+    
+    local leftItem = player:getHeldItem(not handedness)
+    local rightItem = player:getHeldItem(handedness)
+    local rightActive = handedness and "OFF_HAND" or "MAIN_HAND"
+    local leftActive = not handedness and "OFF_HAND" or "MAIN_HAND"
+
+    data.leftItem = leftItem
+    data.rightItem = rightItem
+    data.leftActive = using and activeness == leftActive
+    data.rightActive = using and activeness == rightActive
+    data.leftActiveAction = data.leftActive and leftItem:getUseAction() or "NONE"
+    data.rightActiveAction = data.rightActive and rightItem:getUseAction() or "NONE"
+
+    data.isSleeping = pose == "SLEEPING"
+    data.isSprinting = sprinty and not inLiquid
+    
+
+    data.velocity = velocity
+    data.horizontalSpeed = velocity.xz:length()
+    
+    data.oldOnGround = data.onGround
+    data.isOnGround = player:isOnGround()
+    data.groundTime = data.isOnGround and data.groundTime + 1 or 0
+
+    data.jumpTime = data.jumpTime * 0.85
+    if not data.onGround and data.oldOnGround and velocity.y > 0.1 then
+        data.jumpTime = math.min(velocity.y * 8, 2)
+    elseif data.onGround then
+        data.jumpTime = math.lerp(data.jumpTime, 0, 0.6)
+    end
+end,
+{
+    wheel = false,
+    isSleeping = false,
+    velocity = vec(0, 0, 0),
+    horizontalSpeed = 0,
+    isOnGround = true,
+    groundTime = 0,
+    jumpTime = 0,
+}
+)
+
+local vanillaHandsAnim = aurianims.stack(
+    aurianims.vanilla(
+        models.model.root.LeftArm,
+        models.model.root.RightArm
+    ),
+    modelAnims.handOverride -- override hand animations so that they dont play twice
+)
+
+local armsAnim = aurianims.stack(
+    vanillaHandsAnim,
+    aurianims.step(
+        function (data)
+            return not data.leftActive and not data.rightActive
+        end,
+        modelAnims.armsidle,
+        aurianims.stack(
+            -- left hand
+            aurianims.switch(
+                function (data)
+                    return data.leftActiveAction
+                end,
+                {
+                    NONE = nil,
+                    BLOCK = modelAnims.blockL, -- shield
+                    SPEAR = modelAnims.spearL, -- trident
+                    CROSSBOW = modelAnims.crossbow, -- crossbow load
+                }
+            ),
+            -- right hand
+            aurianims.switch(
+                function (data)
+                    return data.rightActiveAction
+                end,
+                {
+                    NONE = nil,
+                    BLOCK = modelAnims.blockR, -- shield
+                    SPEAR = modelAnims.spearR, -- trident
+                    CROSSBOW = modelAnims.crossbow, -- crossbow load
+                }
+            ),
+            -- bow
+            aurianims.step(
+                function (data)
+                    local bowL = data.leftActive and data.leftActiveAction == "BOW"
+                    local bowR = data.rightActive and data.rightActiveAction == "BOW"
+                    return bowL or bowR
+                end,
+                modelAnims.bow,
+                nil
+            )
+        )
+    ),
+    -- crossbow
+    aurianims.step(
+        function (data)
+            local loadL = data.leftActive and data.leftActiveAction == "CROSSBOW"
+            local loadR = data.rightActive and data.rightActiveAction == "CROSSBOW"
+            local lTag = data.leftItem.tag
+            local rTag = data.rightItem.tag
+            local crossL = lTag and (lTag["Charged"] == 1 or (lTag["ChargedProjectiles"] and next(lTag["ChargedProjectiles"])~= nil)) or false
+            local crossR = rTag and (rTag["Charged"] == 1 or (rTag["ChargedProjectiles"] and next(rTag["ChargedProjectiles"])~= nil)) or false
+            return loadL or loadR or crossL or crossR
+        end,
+        modelAnims.crossbow,
+        nil
+    )
+)
+
+local walkAnim = aurianims.mix(
+    function (data, old, anim1, anim2)
+        anim2:speed(math.clamp(data.horizontalSpeed * 4, 0.5, 1.0))
+        return math.lerp(
+            old,
+            math.clamp(data.horizontalSpeed * 4, 0, 1),
+            0.4
+        )
+    end,
+    aurianims.stack(
+        modelAnims.tailidle,
+        armsAnim
+    ),
+    modelAnims.walk
+)
+
+local movementAnim = aurianims.step(
+    function (data)
+        return data.isSprinting
+    end,
+    modelAnims.sprint,
+    walkAnim
+)
+
+local playerAnim = aurianims.step(
+    function (data)
+        return data.isSleeping
+    end,
+    modelAnims.sleep,
+    movementAnim
+)
+
+local mainAnim = aurianims.step(
+    function (data)
+        return data.wheel
+    end,
+    nil,
+    playerAnim
+)
+
+animController:setTree(mainAnim)
 
 function events.entity_init()
-    animations.model.crouchfall
-    :setBlendTime(2)
-    :setOnBlend(blendVanillaAnimHead)
-
-    animations.model.jumpup
-    :setBlendTime(2, 8)
-    animations.model.jumpdown
-    :setBlendTime(16, 4)
-    :setBlendCurve("easeInOutSine")
-    animations.model.walkjumpup
-    :setBlendTime(2, 8)
-    animations.model.walkjumpdown
-    :setBlendTime(16, 4)
-    :setBlendCurve("easeInOutSine")
-    animations.model.fly
-    :setBlendTime(2, 8)
-
-    local quickDraw = {
-        animations.model.bowL,
-        animations.model.bowR,
-        animations.model.blockL,
-        animations.model.blockR,
-    }
-    for _, anim in pairs(quickDraw) do
-        anim
-        :setBlendTime(1, 8)
-        :setBlendCurve("easeInOutSine")
-    end
-
-    animations.model.spearL:setPriority(1)
-    animations.model.spearR:setPriority(1)
-    animations.model.bowL:setPriority(1)
-    animations.model.bowR:setPriority(1)
-    animations.model.crossL:setPriority(1)
-    animations.model.crossR:setPriority(1)
-    animations.model.loadL:setPriority(1)
-    animations.model.loadR:setPriority(1)
-    animations.model.blockL:setPriority(1)
-    animations.model.blockR:setPriority(1)
-
-    animations.model.sprint:setPriority(2)
-    animations.model.sprintjumpup:setPriority(2)
-    animations.model.sprintjumpdown:setPriority(2)
-    animations.model.climb:setPriority(2)
-
     animations.model.sprint:setSpeed(0.8)
 end
 
-local wAnim = nil
-local wAnimPos = vec(0, 0, 0)
+local wheelAnim = nil
+local wheelAnimPos = vec(0, 0, 0)
 local wAnimStopDistanceSquared = 0.01
--- running animation speed and strength setting
-local oldHVel = 0
-local newHVel = 0
-local oldVVel = 0
-local newVVel = 0
+
 function events.tick()
     -- stop wheel anims when moving
-    if wAnim and (wAnimPos - player:getPos()):lengthSquared() > wAnimStopDistanceSquared then pings.stopWheelAnim() end
+    if wheelAnim and (wheelAnimPos - player:getPos()):lengthSquared() > wAnimStopDistanceSquared then pings.stopWheelAnim() end
 
-    -- set walking animation speed
-    if animations.model.walk:isPlaying() or animations.model.walkback:isPlaying() then
-        local pVel = player:getVelocity()
-        oldHVel = newHVel
-        newHVel = math.lerp(oldHVel, pVel.xz:length(), 0.5)
-        animations.model.walk:setSpeed(math.clamp(newHVel * 4, 0.5, 2))
-        animations.model.walkback:setSpeed(math.clamp(newHVel * 6, 0.5, 2))
-    else
-        oldHVel = 0
-        newHVel = 0
-    end
-    
-    -- set climbing animation speed
-    if animations.model.climb:isPlaying() then
-        local pVel = player:getVelocity()
-        oldVVel = newVVel
-        -- dont lerp when changing directions
-        newVVel = (oldVVel * newVVel < 0) and pVel.y or math.lerp(oldVVel, pVel.y, 0.5) 
-        animations.model.climb:setSpeed(math.min(1.5, (newVVel / 0.15)))
-    else
-        oldVVel = 0
-        newVVel = 0
-    end
+    -- print(player:getHeldItem():getUseAction(), player:isUsingItem(), player:getActiveHand())
+    -- printTable(animations:getPlaying())
 end
 
 function events.render(delta)
-    if newHVel > 0 or oldHVel > 0 then
-        local weight = math.lerp(oldHVel, newHVel, delta)
-        animations.model.walk:setBlend(math.min(1, math.abs(weight * 5)))
-    end
+    -- if newHVel > 0 or oldHVel > 0 then
+    --     local weight = math.lerp(oldHVel, newHVel, delta)
+    --     animations.model.walk:setBlend(math.min(1, math.abs(weight * 5)))
+    -- end
 
-    -- set calves rotation for swimming
-    local lCalfRot = vec(0, 0, 0)
-    local rCalfRot = vec(0, 0, 0)
-    if animations.model.swim:isPlaying() then
-        lCalfRot = vanilla_model.LEFT_LEG:getOriginRot()
-        rCalfRot = vanilla_model.RIGHT_LEG:getOriginRot()
-        lCalfRot.x = math.min(0, lCalfRot.x)
-        rCalfRot.x = math.min(0, rCalfRot.x)
-    end
-    models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
-    models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
+    -- -- set calves rotation for swimming
+    -- local lCalfRot = vec(0, 0, 0)
+    -- local rCalfRot = vec(0, 0, 0)
+    -- if animations.model.swim:isPlaying() then
+    --     lCalfRot = vanilla_model.LEFT_LEG:getOriginRot()
+    --     rCalfRot = vanilla_model.RIGHT_LEG:getOriginRot()
+    --     lCalfRot.x = math.min(0, lCalfRot.x)
+    --     rCalfRot.x = math.min(0, rCalfRot.x)
+    -- end
+    -- models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
+    -- models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
 end
 
 
 function pings.stopWheelAnim()
-    if wAnim then
-        wAnim:stop()
-        wAnim = nil
+    if wheelAnim then
+        wheelAnim:stop()
+        wheelAnim = nil
     end
-    EZAnims.model:setAllOff(false)
+    animController.data.wheel = false
     pings.setSkinSleeping(false)
 end
 function pings.playWheelAnim(animName)
-    EZAnims.model:setAllOff(true)
-    wAnimPos = player:getPos()
-    if wAnim then wAnim:stop() end
-    wAnim = animations.model[animName]
-    wAnim:play(true)
+    wheelAnimPos = player:getPos()
+    if wheelAnim then wheelAnim:stop() end
+    wheelAnim = animations.model[animName]
+    animController.data.wheel = true
+    wheelAnim:play()
 end
 
 wheel.animPage:newAction()
