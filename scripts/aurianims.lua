@@ -57,10 +57,9 @@ function lib.mix(func, anim1, anim2)
 end
 
 ---creates stack node, allows to use multiple animations or nodes at once
----@param ... aurianims.node|Animation
+---@param anims aurianims.node[]|Animation[]
 ---@return aurianims.node
-function lib.stack(...)
-   local anims = {...}
+function lib.stack(anims)
    return {
       type = 'stack',
       anims = anims
@@ -108,10 +107,9 @@ function lib.switch(func, anims)
 end
 
 ---creates vanilla leaf node, allows to use vanilla animations with blending
----@param ... ModelPart
+---@param parts ModelPart[]
 ---@return aurianims.node
-function lib.vanilla(...)
-   local parts = {...}
+function lib.vanilla(parts)
    local part_list = {}
 
    for _, part in ipairs(parts) do

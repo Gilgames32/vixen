@@ -57,22 +57,22 @@ end,
 }
 )
 
-local vanillaHandsAnim = aurianims.stack(
-    aurianims.vanilla(
+local vanillaHandsAnim = aurianims.stack{
+    aurianims.vanilla{
         models.model.root.LeftArm,
         models.model.root.RightArm
-    ),
+    },
     modelAnims.handOverride -- override hand animations so that they dont play twice
-)
+}
 
-local armsAnim = aurianims.stack(
+local armsAnim = aurianims.stack{
     vanillaHandsAnim,
     aurianims.step(
         function (data)
             return not data.leftActive and not data.rightActive
         end,
         modelAnims.armsidle,
-        aurianims.stack(
+        aurianims.stack{
             -- left hand
             aurianims.switch(
                 function (data)
@@ -107,7 +107,7 @@ local armsAnim = aurianims.stack(
                 modelAnims.bow,
                 nil
             )
-        )
+        }
     ),
     -- crossbow
     aurianims.step(
@@ -123,7 +123,7 @@ local armsAnim = aurianims.stack(
         modelAnims.crossbow,
         nil
     )
-)
+}
 
 local walkAnim = aurianims.mix(
     function (data, old, anim1, anim2)
@@ -134,10 +134,10 @@ local walkAnim = aurianims.mix(
             0.4
         )
     end,
-    aurianims.stack(
+    aurianims.stack{
         modelAnims.tailidle,
         armsAnim
-    ),
+    },
     modelAnims.walk
 )
 
