@@ -91,9 +91,11 @@ function events.tick()
     newTailRot.x = cosLerpAngle(newTailRot.x, targetRot.x, 90, lerpStrenght)
     newTailRot.y = cosLerpAngle(newTailRot.y, targetRot.y, 180, lerpStrenght)
 
+    local speed = math.clamp(playerVel.z, -0.5, 0.5)
+
     -- calculate wag time
     oldWagTime = newWagTime 
-    newWagTime = newWagTime + math.min(1, math.sqrt(math.abs(playerVel.z / 0.32))) * wagSpeed * waterStrength * wagWalkSpeed
+    newWagTime = newWagTime + math.min(1, math.sqrt(math.abs(speed / 0.32))) * wagSpeed * waterStrength * wagWalkSpeed
     if newWagTime > 2 * math.pi then -- overflow for better precision
         newWagTime = newWagTime - 2 * math.pi
         oldWagTime = oldWagTime - 2 * math.pi
@@ -102,7 +104,7 @@ function events.tick()
     -- calculate wag strenght
     if tailWagged then wagWalkSpeed = 0.1 end -- wag less while its animated
     oldWagStrenght = newWagStrenght
-    newWagStrenght = math.lerp(newWagStrenght, playerVel.z * waterStrength * wagWalkSpeed, 0.1)
+    newWagStrenght = math.lerp(newWagStrenght, speed * waterStrength * wagWalkSpeed, 0.1)
 
 end
 
