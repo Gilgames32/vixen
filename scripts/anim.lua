@@ -15,12 +15,10 @@ animController:setDriver(function (data)
     local handedness = player:isLeftHanded()
     local using = player:isUsingItem()
     local activeness = player:getActiveHand()
-    
     local leftItem = player:getHeldItem(not handedness)
     local rightItem = player:getHeldItem(handedness)
     local rightActive = handedness and "OFF_HAND" or "MAIN_HAND"
     local leftActive = not handedness and "OFF_HAND" or "MAIN_HAND"
-
     data.leftItem = leftItem
     data.rightItem = rightItem
     data.leftActive = using and activeness == leftActive
@@ -30,7 +28,7 @@ animController:setDriver(function (data)
 
     data.isSleeping = pose == "SLEEPING"
     data.isSprinting = sprinty and not inLiquid
-    
+    data.sprintScale = math.lerp(data.sprintScale, data.isSprinting and 1 or 0, 0.6)
 
     data.velocity = velocity
     data.horizontalSpeed = velocity.xz:length()
@@ -48,12 +46,11 @@ animController:setDriver(function (data)
 end,
 {
     wheel = false,
-    isSleeping = false,
-    velocity = vec(0, 0, 0),
-    horizontalSpeed = 0,
-    isOnGround = true,
     groundTime = 0,
     jumpTime = 0,
+
+    sprintTimer = 0,
+    sprintScale = 0,
 }
 )
 
@@ -65,67 +62,85 @@ local vanillaHandsAnim = aurianims.stack{
     modelAnims.handOverride -- override hand animations so that they dont play twice
 }
 
+local leftArmAnim = aurianims.switch(
+    function (data)
+        return data.leftActiveAction
+    end,
+    {
+        NONE = nil,
+        BLOCK = modelAnims.blockL, -- shield
+        SPEAR = modelAnims.spearL, -- trident
+    }
+)
+
+local rightArmAnim = aurianims.switch(
+    function (data)
+        return data.rightActiveAction
+    end,
+    {
+        NONE = nil,
+        BLOCK = modelAnims.blockR, -- shield
+        SPEAR = modelAnims.spearR, -- trident
+    }
+)
+
+local bowAnim = aurianims.conditional(
+    function (data)
+        local bowL = data.leftActive and data.leftActiveAction == "BOW"
+        local bowR = data.rightActive and data.rightActiveAction == "BOW"
+        return bowL or bowR
+    end,
+    modelAnims.bow
+)
+
+local crossbowAnim = aurianims.conditional(
+    function (data)
+        local loadL = data.leftActive and data.leftActiveAction == "CROSSBOW"
+        local loadR = data.rightActive and data.rightActiveAction == "CROSSBOW"
+        local lTag = data.leftItem.tag
+        local rTag = data.rightItem.tag
+        local crossL = lTag and (lTag["Charged"] == 1 or (lTag["ChargedProjectiles"] and next(lTag["ChargedProjectiles"])~= nil)) or false
+        local crossR = rTag and (rTag["Charged"] == 1 or (rTag["ChargedProjectiles"] and next(rTag["ChargedProjectiles"])~= nil)) or false
+        return loadL or loadR or crossL or crossR
+    end,
+    modelAnims.crossbow
+)
+
+local eatingAnim = aurianims.conditional(
+    function (data)
+        local eatL = data.leftActive and data.leftActiveAction == "EAT"
+        local eatR = data.rightActive and data.rightActiveAction == "EAT"
+        return eatL or eatR
+    end,
+    modelAnims.eat
+)
+
+local drinkingAnim = aurianims.conditional(
+    function (data)
+        local drinkL = data.leftActive and data.leftActiveAction == "DRINK"
+        local drinkR = data.rightActive and data.rightActiveAction == "DRINK"
+        return drinkL or drinkR
+    end,
+    modelAnims.drink
+)
+
 local armsAnim = aurianims.stack{
     vanillaHandsAnim,
     aurianims.step(
         function (data)
             return not data.leftActive and not data.rightActive
         end,
-        modelAnims.armsidle,
+        modelAnims.armsIdle,
         aurianims.stack{
-            -- left hand
-            aurianims.switch(
-                function (data)
-                    return data.leftActiveAction
-                end,
-                {
-                    NONE = nil,
-                    BLOCK = modelAnims.blockL, -- shield
-                    SPEAR = modelAnims.spearL, -- trident
-                    CROSSBOW = modelAnims.crossbow, -- crossbow load
-                }
-            ),
-            -- right hand
-            aurianims.switch(
-                function (data)
-                    return data.rightActiveAction
-                end,
-                {
-                    NONE = nil,
-                    BLOCK = modelAnims.blockR, -- shield
-                    SPEAR = modelAnims.spearR, -- trident
-                    CROSSBOW = modelAnims.crossbow, -- crossbow load
-                }
-            ),
-            -- bow
-            aurianims.step(
-                function (data)
-                    local bowL = data.leftActive and data.leftActiveAction == "BOW"
-                    local bowR = data.rightActive and data.rightActiveAction == "BOW"
-                    return bowL or bowR
-                end,
-                modelAnims.bow,
-                nil
-            )
+            leftArmAnim,
+            rightArmAnim,
+            bowAnim
         }
     ),
-    -- crossbow
-    aurianims.step(
-        function (data)
-            local loadL = data.leftActive and data.leftActiveAction == "CROSSBOW"
-            local loadR = data.rightActive and data.rightActiveAction == "CROSSBOW"
-            local lTag = data.leftItem.tag
-            local rTag = data.rightItem.tag
-            local crossL = lTag and (lTag["Charged"] == 1 or (lTag["ChargedProjectiles"] and next(lTag["ChargedProjectiles"])~= nil)) or false
-            local crossR = rTag and (rTag["Charged"] == 1 or (rTag["ChargedProjectiles"] and next(rTag["ChargedProjectiles"])~= nil)) or false
-            return loadL or loadR or crossL or crossR
-        end,
-        modelAnims.crossbow,
-        nil
-    )
+    crossbowAnim
 }
 
-local walkAnim = aurianims.mix(
+local twoLeggedAnim = aurianims.mix(
     function (data, old, anim1, anim2)
         anim2:speed(math.clamp(data.horizontalSpeed * 4, 0.5, 1.0))
         return math.lerp(
@@ -141,12 +156,17 @@ local walkAnim = aurianims.mix(
     modelAnims.walk
 )
 
-local movementAnim = aurianims.step(
+local fourLeggedAnim = aurianims.stack{
+    -- TODO
+    modelAnims.sprint
+}
+
+local movementAnim = aurianims.mix(
     function (data)
-        return data.isSprinting
+        return data.sprintScale, false
     end,
-    modelAnims.sprint,
-    walkAnim
+    twoLeggedAnim,
+    fourLeggedAnim
 )
 
 local playerAnim = aurianims.step(
@@ -154,7 +174,11 @@ local playerAnim = aurianims.step(
         return data.isSleeping
     end,
     modelAnims.sleep,
-    movementAnim
+    aurianims.stack{
+        movementAnim,
+        eatingAnim,
+        drinkingAnim,
+    }
 )
 
 local mainAnim = aurianims.step(

@@ -68,7 +68,7 @@ end
 
 ---creates blend node, allows to control how much animation will be used depending on return value from function 
 ---@param func fun(data: table, old: number, anim: aurianims.node|Animation): blend: number, instant: boolean?
----@param anim any
+---@param anim aurianims.node[]|Animation[]
 ---@return table
 function lib.blend(func, anim)
    return {
@@ -80,8 +80,20 @@ function lib.blend(func, anim)
    }
 end
 
+---creates conditional node, allows to control if an animation is used or not depending on return value from function
+---@param func fun(data: table, anim: aurianims.node|Animation): blend: boolean
+---@param anim aurianims.node[]|Animation[]
+---@return table
+function lib.conditional(func, anim)
+   return {
+      type = 'conditional',
+      func = func,
+      anim = anim,
+   }
+end
+
 ---creates step mode, allow choose between two animations depending on a predicate function, if predicate returns true anim1 will be used, if false anim2 will be used
----@param func fun(data: table): boolean
+---@param func fun(data: table): blend: boolean
 ---@param anim1 aurianims.node|Animation
 ---@param anim2 aurianims.node|Animation
 ---@return aurianims.node
@@ -95,7 +107,7 @@ function lib.step(func, anim1, anim2)
 end
 
 ---creates multi step node, allows to choose between multiple animations depending on a predicate function, the function should return the name of the animation that should be used
----@param func fun(data: table): string
+---@param func fun(data: table): blend: string
 ---@param anims table<string, aurianims.node|Animation>
 ---@return aurianims.node
 function lib.switch(func, anims)
@@ -154,11 +166,15 @@ nodesUpdate = {
    end,
    blend = function(controller, node, blendMul)
       node.oldBLend = node.blend
-      local blend, instant = node.func(controller.data, node.blend, node.anim1, node.anim2)
+      local blend, instant = node.func(controller.data, node.blend, node.anim)
       blend = math.clamp(blend, 0, 1)
       node.blend = blend
       if instant then node.oldBLend = blend end
       update(controller, node.anim, blendMul * blend)
+   end,
+   conditional = function(controller, node, blendMul)
+      local cond = node.func(controller.data, node.anim)
+      update(controller, node.anim, blendMul * (cond and 1 or 0))
    end,
    step = function(controller, node, blendMul)
       local pred = node.func(controller.data)
@@ -202,6 +218,10 @@ nodesUpdateRender = {
    blend = function(delta, controller, node, blendMul)
       local blend = math.lerp(node.oldBLend, node.blend, delta)
       updateRender(delta, controller, node.anim, blendMul * blend)
+   end,
+   conditional = function(delta, controller, node, blendMul)
+      local cond = node.func(controller.data, node.anim)
+      updateRender(delta, controller, node.anim, blendMul * (cond and 1 or 0))
    end,
    step = function(delta, controller, node, blendMul)
       local pred = node.func(controller.data)
