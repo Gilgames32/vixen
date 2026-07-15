@@ -127,18 +127,44 @@ local drinkingAnim = aurianims.conditional(
     modelAnims.drink
 )
 
+local leftArm = models.model.root.LeftArm
+local leftItemPivot = leftArm.LeftItemPivot
+local rightArm = models.model.root.RightArm
+local rightItemPivot = rightArm.RightItemPivot
+local enderPivot = models.model.root.Body.EnderPivot
+local blockHoldAnim = aurianims.step(
+    function (data)
+        
+        local r = rightArm:getOffsetRot()
+        local l = leftArm:getOffsetRot()
+        local idk = r.x - 18 -- magic number
+        enderPivot:setRot(vec(0, idk, 0))
+        enderPivot:setPos(vec(0, idk / 25, -idk / 20)) -- what was i even thinking
+        
+        return player:getHeldItem():isBlockItem()
+    end,
+    aurianims.step(
+        function (data)
+            return player:isLeftHanded()
+        end,
+        modelAnims.blockHoldL,
+        modelAnims.blockHoldR
+    ),
+    modelAnims.armsIdle
+)
+
 local armsAnim = aurianims.stack{
     vanillaHandsAnim,
     aurianims.step(
         function (data)
-            return not data.leftActive and not data.rightActive
+            return data.leftActive or data.rightActive
         end,
-        modelAnims.armsIdle,
         aurianims.stack{
             leftArmAnim,
             rightArmAnim,
             bowAnim
-        }
+        },
+        blockHoldAnim
     ),
     crossbowAnim
 }
