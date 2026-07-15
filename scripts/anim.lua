@@ -10,6 +10,7 @@ animController:setDriver(function (data)
     local sprinty = player:isSprinting()
     local pose = player:getPose()
     local inLiquid = #world.getBlockState(player:getPos()):getFluidTags() >= 1
+    local vehicle = player:getVehicle()
     
     -- hands
     local handedness = player:isLeftHanded()
@@ -26,7 +27,9 @@ animController:setDriver(function (data)
     data.leftActiveAction = data.leftActive and leftItem:getUseAction() or "NONE"
     data.rightActiveAction = data.rightActive and rightItem:getUseAction() or "NONE"
 
-    data.isSleeping = pose == "SLEEPING"
+    if vehicle ~= nil then pose = "SITTING" end
+    data.pose = pose
+
     data.isSprinting = sprinty and not inLiquid
     data.sprintScale = math.lerp(data.sprintScale, data.isSprinting and 1 or 0, 0.6)
 
@@ -169,15 +172,18 @@ local movementAnim = aurianims.mix(
     fourLeggedAnim
 )
 
-local playerAnim = aurianims.step(
+local playerAnim = aurianims.switch(
     function (data)
-        return data.isSleeping
-    end,
-    modelAnims.sleep,
-    aurianims.stack{
-        movementAnim,
-        eatingAnim,
-        drinkingAnim,
+        return data.pose
+    end, 
+    {
+        SLEEP = modelAnims.sleep,
+        SITTING = modelAnims.sit,
+        STANDING = aurianims.stack{
+            movementAnim,
+            eatingAnim,
+            drinkingAnim,
+        }
     }
 )
 
