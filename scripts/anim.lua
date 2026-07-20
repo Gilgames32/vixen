@@ -27,6 +27,8 @@ animController:setDriver(function (data)
     data.leftActiveAction = data.leftActive and leftItem:getUseAction() or "NONE"
     data.rightActiveAction = data.rightActive and rightItem:getUseAction() or "NONE"
 
+    data.blockHeld = player:getHeldItem():isBlockItem()
+
     if vehicle ~= nil then pose = "SITTING" end
     data.pose = pose
 
@@ -35,6 +37,9 @@ animController:setDriver(function (data)
 
     data.velocity = velocity
     data.horizontalSpeed = velocity.xz:length()
+
+    data.walkScale = math.clamp(data.horizontalSpeed * 5, 0, 1)
+    data.smoothWalkScale = math.lerp(data.smoothWalkScale, data.walkScale, 0.4)
     
     data.oldOnGround = data.onGround
     data.isOnGround = player:isOnGround()
@@ -54,6 +59,7 @@ end,
 
     sprintTimer = 0,
     sprintScale = 0,
+    smoothWalkScale = 0,
 }
 )
 
@@ -127,21 +133,9 @@ local drinkingAnim = aurianims.conditional(
     modelAnims.drink
 )
 
-local leftArm = models.model.root.LeftArm
-local leftItemPivot = leftArm.LeftItemPivot
-local rightArm = models.model.root.RightArm
-local rightItemPivot = rightArm.RightItemPivot
-local enderPivot = models.model.root.Body.EnderPivot
-local blockHoldAnim = aurianims.step(
+local walkBlockHoldAnim = aurianims.mix(
     function (data)
-        
-        local r = rightArm:getOffsetRot()
-        local l = leftArm:getOffsetRot()
-        local idk = r.x - 18 -- magic number
-        enderPivot:setRot(vec(0, idk, 0))
-        enderPivot:setPos(vec(0, idk / 25, -idk / 20)) -- what was i even thinking
-        
-        return player:getHeldItem():isBlockItem()
+        return data.smoothWalkScale
     end,
     aurianims.step(
         function (data)
@@ -150,11 +144,35 @@ local blockHoldAnim = aurianims.step(
         modelAnims.blockHoldL,
         modelAnims.blockHoldR
     ),
-    modelAnims.armsIdle
+    modelAnims.blockHoldWalk
+)
+
+local rightArm = models.model.root.RightArm
+local leftArm = models.model.root.LeftArm
+local enderPivot = models.model.root.Body.EnderPivot
+local blockHoldAnim = aurianims.step(
+    function (data)
+        -- set ender block wiggle
+        local r = rightArm:getOffsetRot()
+        local magic = math.rad(r.z - 2.9)
+        local slow = math.sin(magic / 2)
+        local fast = math.sin(magic * 2)
+        enderPivot:setRot(vec(0, slow * 60 + 90, 0))
+        enderPivot:setPos(vec(0, fast, -fast))
+        
+        return data.blockHeld
+    end,
+    walkBlockHoldAnim,
+    aurianims.mix(
+        function (data)
+            return data.smoothWalkScale
+        end,
+        modelAnims.idle,
+        modelAnims.armsWalk
+    )
 )
 
 local armsAnim = aurianims.stack{
-    vanillaHandsAnim,
     aurianims.step(
         function (data)
             return data.leftActive or data.rightActive
@@ -162,28 +180,37 @@ local armsAnim = aurianims.stack{
         aurianims.stack{
             leftArmAnim,
             rightArmAnim,
-            bowAnim
+            bowAnim,
         },
-        blockHoldAnim
+        aurianims.stack{
+            blockHoldAnim,
+            modelAnims.bigBlock,
+        }
     ),
     crossbowAnim
 }
 
-local twoLeggedAnim = aurianims.mix(
-    function (data, old, anim1, anim2)
-        anim2:speed(math.clamp(data.horizontalSpeed * 4, 0.5, 1.0))
-        return math.lerp(
-            old,
-            math.clamp(data.horizontalSpeed * 4, 0, 1),
-            0.4
-        )
-    end,
-    aurianims.stack{
-        modelAnims.tailidle,
-        armsAnim
-    },
-    modelAnims.walk
-)
+local twoLeggedAnim = aurianims.stack{
+    modelAnims.tailidle,
+    armsAnim,
+    aurianims.mix(
+        function (data)
+            local speed = math.max(0.5, data.walkScale)
+            modelAnims.walk:setSpeed(speed)
+            modelAnims.armsWalk:setSpeed(speed)
+            modelAnims.armsWalk:setTime(modelAnims.walk:getTime())
+            return data.smoothWalkScale
+        end,
+        aurianims.blend(
+            function (data)
+                return 1 - (data.blockHeld and 0.75 or 0)
+            end,
+            vanillaHandsAnim
+        ),
+        modelAnims.walk
+    )
+}
+
 
 local fourLeggedAnim = aurianims.stack{
     -- TODO

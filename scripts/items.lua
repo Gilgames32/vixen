@@ -63,7 +63,7 @@ function events.tick()
     local drink = isMouthDrink(mainHandItem)
     local sprinting = player:isSprinting()
 
-    local block = animations.model.blockHoldR:getBlend() > 0.1
+    local block = player:getHeldItem():isBlockItem()
     enderIP:setParentType((block and not sprinting) and "RightItemPivot" or "None")
     
     rightIP:setParentType((not handedness and not item and not drink and not block and not (tool and sprinting)) and "RightItemPivot" or "None")
