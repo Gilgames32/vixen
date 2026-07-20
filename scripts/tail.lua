@@ -53,6 +53,9 @@ function events.tick()
     elseif playerPose == "FALL_FLYING" or playerPose == "SPIN_ATTACK" then
         bodyPitch = -90 - player:getRot().x
         wagWalkSpeed = 0
+    elseif player:getVehicle() ~= nil then
+        waterStrength = 0.5
+        wagWalkSpeed = 0.5
     end
     local playerVelRaw = vectors.rotateAroundAxis(bodyPitch, playerVel, vec(1, 0, 0))
 
