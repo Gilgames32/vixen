@@ -14,6 +14,7 @@ animController:setDriver(function (data)
     local pose = player:getPose()
     local inLiquid = #world.getBlockState(player:getPos()):getFluidTags() >= 1
     local vehicle = player:getVehicle()
+    local isCrouching = player:isCrouching()
     
     -- hands
     local handedness = player:isLeftHanded()
@@ -41,7 +42,7 @@ animController:setDriver(function (data)
     data.velocity = velocity
     data.horizontalSpeed = velocity.xz:length()
 
-    data.walkScale = math.clamp(data.horizontalSpeed * 5, 0, 1)
+    data.walkScale = math.clamp(data.horizontalSpeed * (isCrouching and 16 or 5), 0, 1)
     data.smoothWalkScale = math.lerp(data.smoothWalkScale, data.walkScale, 0.5)
     
     data.oldOnGround = data.onGround
@@ -194,7 +195,7 @@ local armsAnim = aurianims.stack{
 }
 
 local twoLeggedAnim = aurianims.stack{
-    modelAnims.tailidle,
+    modelAnims.tailIdle,
     armsAnim,
     aurianims.mix(
         function (data)
@@ -228,6 +229,14 @@ local movementAnim = aurianims.mix(
     fourLeggedAnim
 )
 
+local crouchAnim = aurianims.mix(
+    function (data)
+        return data.smoothWalkScale
+    end,
+    modelAnims.crouch,
+    modelAnims.crouchWalk
+)
+
 local playerAnim = aurianims.switch(
     function (data)
         return data.pose
@@ -235,6 +244,9 @@ local playerAnim = aurianims.switch(
     {
         SLEEP = modelAnims.sleep,
         SITTING = modelAnims.sit,
+        CROUCHING = crouchAnim,
+        --FALL_FLYING = elytra
+        --SWIMMING = anthroswim,
         STANDING = aurianims.stack{
             movementAnim,
             eatingAnim,
@@ -319,4 +331,12 @@ wheel.animPage:newAction()
 :onLeftClick(function (_)
     pings.setSkinSleeping(false)
     pings.playWheelAnim("wSit")
+end)
+
+wheel.animPage:newAction()
+:setTitle("sit alt")
+:setItem("minecraft:oak_stairs")
+:onLeftClick(function (_)
+    pings.setSkinSleeping(false)
+    pings.playWheelAnim("wSitAlt")
 end)
