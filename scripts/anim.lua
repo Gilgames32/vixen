@@ -5,6 +5,9 @@ local aurianims = require("scripts.aurianims")
 local modelAnims = animations["model"]
 local animController = aurianims.new()
 
+local sprintAnimSpeedMult = 0.8
+local walkAnimSpeedMult = 0.9
+
 animController:setDriver(function (data)
     local velocity = player:getVelocity()
     local sprinty = player:isSprinting()
@@ -39,7 +42,7 @@ animController:setDriver(function (data)
     data.horizontalSpeed = velocity.xz:length()
 
     data.walkScale = math.clamp(data.horizontalSpeed * 5, 0, 1)
-    data.smoothWalkScale = math.lerp(data.smoothWalkScale, data.walkScale, 0.4)
+    data.smoothWalkScale = math.lerp(data.smoothWalkScale, data.walkScale, 0.5)
     
     data.oldOnGround = data.onGround
     data.isOnGround = player:isOnGround()
@@ -167,7 +170,7 @@ local blockHoldAnim = aurianims.step(
         function (data)
             return data.smoothWalkScale
         end,
-        modelAnims.idle,
+        modelAnims.armsIdle,
         modelAnims.armsWalk
     )
 )
@@ -196,8 +199,8 @@ local twoLeggedAnim = aurianims.stack{
     aurianims.mix(
         function (data)
             local speed = math.max(0.5, data.walkScale)
-            modelAnims.walk:setSpeed(speed)
-            modelAnims.armsWalk:setSpeed(speed)
+            modelAnims.walk:setSpeed(speed * walkAnimSpeedMult)
+            modelAnims.armsWalk:setSpeed(speed * walkAnimSpeedMult)
             modelAnims.armsWalk:setTime(modelAnims.walk:getTime())
             return data.smoothWalkScale
         end,
@@ -251,7 +254,7 @@ local mainAnim = aurianims.step(
 animController:setTree(mainAnim)
 
 function events.entity_init()
-    animations.model.sprint:setSpeed(0.8)
+    animations.model.sprint:setSpeed(sprintAnimSpeedMult)
 end
 
 local wheelAnim = nil
