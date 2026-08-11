@@ -44,7 +44,7 @@ local function isMouthDrink(item)
 end
 
 local blocks = {
-    --"minecraft:grass_block",
+    "minecraft:grass_block",
 }
 
 local mouthIP = models.model.root.Head.MouthIPivot
@@ -52,30 +52,25 @@ local mouthTP = models.model.root.Head.MouthTPivot
 local mouthDP = models.model.root.Head.MouthDPivot
 local rightIP = models.model.root.RightArm.RightItemPivot
 local leftIP = models.model.root.LeftArm.LeftItemPivot
-local enderIP = models.model.root.EnderIPivot
+local enderIP = models.model.root.Body.EnderPivot.EnderItemPivot
 
 function events.tick()
-    local handedness = false -- TODO player:isLeftHanded()
-    local mainHandItem = player:getHeldItem(handedness)
-    
+    -- TODO: left handed mode
+    local mainHandItem = player:getHeldItem()
+    local handedness = player:isLeftHanded()
     local item = isMouthItem(mainHandItem)
     local tool = isMouthTool(mainHandItem)
     local drink = isMouthDrink(mainHandItem)
-    local block = contains(blocks, mainHandItem.id)
-    local sprinting = player:isSprinting()
+    local onFours = player:isSprinting() or player:isCrouching()
 
-    if block then
-        animations.model.blockhold:play()
-    else
-        animations.model.blockhold:stop()
-    end
-    enderIP:setParentType((block and not sprinting) and "RightItemPivot" or "None")
+    local block = player:getHeldItem():isBlockItem()
+    enderIP:setParentType(block and "RightItemPivot" or "None")
     
-    rightIP:setParentType((not handedness and not item and not drink and not block and not (tool and sprinting)) and "RightItemPivot" or "None")
+    rightIP:setParentType((not handedness and not item and not drink and not block and not (tool and onFours)) and "RightItemPivot" or "None")
     -- TODO fix pivot breaking when the secondary arms parent type is changed 
     --leftIP:setParentType((handedness and not isItem and not isTool) and "LeftItemPivot" or "None")
     
     mouthDP:setParentType((drink) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
     mouthIP:setParentType((item and not drink) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
-    mouthTP:setParentType((tool and sprinting) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
+    mouthTP:setParentType((tool and onFours) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
 end
