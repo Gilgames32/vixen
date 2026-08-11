@@ -57,20 +57,20 @@ local enderIP = models.model.root.Body.EnderPivot.EnderItemPivot
 function events.tick()
     -- TODO: left handed mode
     local mainHandItem = player:getHeldItem()
-    
+    local handedness = player:isLeftHanded()
     local item = isMouthItem(mainHandItem)
     local tool = isMouthTool(mainHandItem)
     local drink = isMouthDrink(mainHandItem)
-    local sprinting = player:isSprinting()
+    local onFours = player:isSprinting() or player:isCrouching()
 
     local block = player:getHeldItem():isBlockItem()
-    enderIP:setParentType((block and not sprinting) and "RightItemPivot" or "None")
+    enderIP:setParentType(block and "RightItemPivot" or "None")
     
-    rightIP:setParentType((not handedness and not item and not drink and not block and not (tool and sprinting)) and "RightItemPivot" or "None")
+    rightIP:setParentType((not handedness and not item and not drink and not block and not (tool and onFours)) and "RightItemPivot" or "None")
     -- TODO fix pivot breaking when the secondary arms parent type is changed 
     --leftIP:setParentType((handedness and not isItem and not isTool) and "LeftItemPivot" or "None")
     
     mouthDP:setParentType((drink) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
     mouthIP:setParentType((item and not drink) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
-    mouthTP:setParentType((tool and sprinting) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
+    mouthTP:setParentType((tool and onFours) and (handedness and "LeftItemPivot" or "RightItemPivot") or "None")
 end

@@ -7,9 +7,12 @@ local animController = aurianims.new()
 
 local sprintAnimSpeedMult = 0.8
 local walkAnimSpeedMult = 0.9
+local walkBackAnimSpeedMult = 1.4
 
 animController:setDriver(function (data)
     local velocity = player:getVelocity()
+    local bodyRot = player:getBodyYaw(1)
+    local rotatedVelocity = vectors.rotateAroundAxis(bodyRot, player:getVelocity(), vec(0, 1, 0))
     local sprinty = player:isSprinting()
     local pose = player:getPose()
     local inLiquid = #world.getBlockState(player:getPos()):getFluidTags() >= 1
@@ -41,9 +44,12 @@ animController:setDriver(function (data)
 
     data.velocity = velocity
     data.horizontalSpeed = velocity.xz:length()
+    data.forwardSpeed = rotatedVelocity.z
 
-    data.walkScale = math.clamp(data.horizontalSpeed * (isCrouching and 16 or 5), 0, 1)
+    local speedMult = (isCrouching and 16 or 5)
+    data.walkScale = math.clamp(data.horizontalSpeed * speedMult, 0, 1)
     data.smoothWalkScale = math.lerp(data.smoothWalkScale, data.walkScale, 0.5)
+    data.smoothForwardScale = math.lerp(data.smoothForwardScale, math.clamp(data.forwardSpeed * speedMult, -1, 1), 0.5)
     
     data.oldOnGround = data.onGround
     data.isOnGround = player:isOnGround()
@@ -64,6 +70,7 @@ end,
     sprintTimer = 0,
     sprintScale = 0,
     smoothWalkScale = 0,
+    smoothForwardScale = 0,
 }
 )
 
@@ -172,7 +179,13 @@ local blockHoldAnim = aurianims.step(
             return data.smoothWalkScale
         end,
         modelAnims.armsIdle,
-        modelAnims.armsWalk
+        aurianims.mix(
+            function (data)
+                return data.smoothForwardScale / 2 + 0.5
+            end,
+            modelAnims.armsWalkBack,
+            modelAnims.armsWalk
+        )
     )
 )
 
@@ -203,6 +216,9 @@ local twoLeggedAnim = aurianims.stack{
             modelAnims.walk:setSpeed(speed * walkAnimSpeedMult)
             modelAnims.armsWalk:setSpeed(speed * walkAnimSpeedMult)
             modelAnims.armsWalk:setTime(modelAnims.walk:getTime())
+            modelAnims.walkBack:setSpeed(speed * walkBackAnimSpeedMult)
+            modelAnims.armsWalkBack:setSpeed(speed * walkBackAnimSpeedMult)
+            modelAnims.armsWalkBack:setTime(modelAnims.walkBack:getTime())
             return data.smoothWalkScale
         end,
         aurianims.blend(
@@ -211,7 +227,13 @@ local twoLeggedAnim = aurianims.stack{
             end,
             vanillaHandsAnim
         ),
-        modelAnims.walk
+        aurianims.mix(
+            function (data)
+                return data.smoothForwardScale / 2 + 0.5
+            end,
+            modelAnims.walkBack,
+            modelAnims.walk
+        )
     )
 }
 
@@ -231,28 +253,49 @@ local movementAnim = aurianims.mix(
 
 local crouchAnim = aurianims.mix(
     function (data)
+        modelAnims.crouchWalk:setSpeed(data.smoothWalkScale * data.smoothForwardScale)
         return data.smoothWalkScale
     end,
     modelAnims.crouch,
     modelAnims.crouchWalk
 )
 
-local playerAnim = aurianims.switch(
+local bendKneesToVanilla = aurianims.func(
+    function (data, blend)
+        -- set calves rotation to match the vanilla rotation of the legs making them look less stiff
+        local lCalfRot = vec(0, 0, 0)
+        local rCalfRot = vec(0, 0, 0)
+        if blend > 0 then
+            lCalfRot = vanilla_model.LEFT_LEG:getOriginRot()
+            rCalfRot = vanilla_model.RIGHT_LEG:getOriginRot()
+            lCalfRot.x = math.clamp(lCalfRot.x, -30, 0)
+            rCalfRot.x = math.clamp(rCalfRot.x, -30, 0)
+        end
+        models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot * blend)
+        models.model.root.RightLeg.RightCalf:setRot(rCalfRot * blend)
+    end
+)
+
+local playerAnim = aurianims.step(
     function (data)
-        return data.pose
-    end, 
-    {
-        SLEEP = modelAnims.sleep,
-        SITTING = modelAnims.sit,
-        CROUCHING = crouchAnim,
-        --FALL_FLYING = elytra
-        --SWIMMING = anthroswim,
-        STANDING = aurianims.stack{
-            movementAnim,
-            eatingAnim,
-            drinkingAnim,
+        return data.pose == "SWIMMING" or data.pose == "FALL_FLYING" or data.pose == "SPIN_ATTACK"
+    end,
+    bendKneesToVanilla,
+    aurianims.switch(
+        function (data)
+            return data.pose
+        end, 
+        {
+            SLEEP = modelAnims.sleep,
+            SITTING = modelAnims.sit,
+            CROUCHING = crouchAnim,
+            STANDING = aurianims.stack{
+                movementAnim,
+                eatingAnim,
+                drinkingAnim,
+            }
         }
-    }
+    )
 )
 
 local mainAnim = aurianims.step(
@@ -279,25 +322,6 @@ function events.tick()
 
     -- print(player:getHeldItem():getUseAction(), player:isUsingItem(), player:getActiveHand())
     -- printTable(animations:getPlaying())
-end
-
-function events.render(delta)
-    -- if newHVel > 0 or oldHVel > 0 then
-    --     local weight = math.lerp(oldHVel, newHVel, delta)
-    --     animations.model.walk:setBlend(math.min(1, math.abs(weight * 5)))
-    -- end
-
-    -- -- set calves rotation for swimming
-    -- local lCalfRot = vec(0, 0, 0)
-    -- local rCalfRot = vec(0, 0, 0)
-    -- if animations.model.swim:isPlaying() then
-    --     lCalfRot = vanilla_model.LEFT_LEG:getOriginRot()
-    --     rCalfRot = vanilla_model.RIGHT_LEG:getOriginRot()
-    --     lCalfRot.x = math.min(0, lCalfRot.x)
-    --     rCalfRot.x = math.min(0, rCalfRot.x)
-    -- end
-    -- models.model.root.LeftLeg.LeftCalf:setRot(lCalfRot)
-    -- models.model.root.RightLeg.RightCalf:setRot(rCalfRot)
 end
 
 
