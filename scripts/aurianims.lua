@@ -118,6 +118,16 @@ function lib.switch(func, anims)
    }
 end
 
+---creates function node, allows to blend arbitrary functions
+---@param func fun(data: table, blend: number)
+---@return aurianims.node
+function lib.func(func)
+   return {
+      type = 'func',
+      func = func,
+   }
+end
+
 ---creates vanilla leaf node, allows to use vanilla animations with blending
 ---@param parts ModelPart[]
 ---@return aurianims.node
@@ -190,6 +200,9 @@ nodesUpdate = {
    vanilla = function(controller, node, blendMul)
       -- leaf
    end,
+   func = function(controller, node, blendMul)
+      -- leaf
+   end,
 }
 
 
@@ -251,6 +264,9 @@ nodesUpdateRender = {
             end
          end
       end
+   end,
+   func = function(delta, controller, node, blendMul)
+      node.func(controller.data, blendMul)
    end,
 }
 
